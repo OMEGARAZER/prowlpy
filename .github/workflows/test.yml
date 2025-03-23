@@ -1,0 +1,39 @@
+name: Python Test
+
+on:
+  push:
+    paths:
+      - "**.py"
+  pull_request:
+    paths:
+      - "**.py"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup UV
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        version: "latest"
+
+    - name: Test with pytest on ${{ matrix.python-version }}
+      run: |
+        uv sync --frozen --all-groups
+        uv run --frozen pytest --verbose --cov=./prowlpy/ --cov-report html
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage_report-${{ matrix.os }}-${{ matrix.python-version }}
+        path: htmlcov/

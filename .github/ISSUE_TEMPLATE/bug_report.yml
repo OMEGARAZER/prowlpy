@@ -1,0 +1,54 @@
+name: "Bug Report"
+description: File a bug report
+title: "[Bug]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for submitting a bug report for Prowlpy. Please fill out the following information so we can fix your issue as quickly as possible.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: The Bug
+      description: Please describe the issue you are having. Please do not post api/provider keys in any code snippets.
+      placeholder: |
+        This is what happens:
+
+        But it should do this:
+
+    validations:
+      required: true
+
+  - type: input
+    id: prowlpy-version
+    attributes:
+      label: prowlpy version
+      description: What is the output of `prowlpy --version`?
+      placeholder: You are currently using vX.X.X the latest is vX.X.X
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: What is the output of `python --version`?
+      placeholder: Python 3.XX.X
+    validations:
+      required: true
+
+  - type: input
+    id: os-type
+    attributes:
+      label: OS type
+      description: What Operating System are you using?
+      placeholder: Ubuntu 2X.XX
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra-info
+    attributes:
+      label: Extra Info
+      description: Is there any extra information you would like to add?

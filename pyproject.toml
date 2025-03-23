@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools>=65.6.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prowlpy"
+authors = [{name = "OMEGA_RAZER"}]
+description = "Prowlpy is a python library that implements the public api of Prowl to send push notification to iPhones."
+keywords = ["prowl", "push", "notification", "iphone"]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "httpx[http2]>=0.23.0",  # Debian Bookworm packaged version
+    "xmltodict>=0.13.0",  # Debian Bookworm packaged version
+]
+dynamic = ["version"]
+
+[tool.setuptools]
+dynamic = {"version" = {attr = "prowlpy.prowlpy.__version__"}}
+packages = ["prowlpy",]
+
+[project.optional-dependencies]
+cli = [
+    "click>=8.1.0",  # Debian Bookworm packaged version
+    "loguru>=0.6.0",  # Debian Bookworm packaged version
+]
+
+[project.scripts]
+prowlpy = "prowlpy:main"
+
+[project.urls]
+"Homepage" = "https://omegarazer.github.io/prowlpy"
+"Source" = "https://github.com/OMEGARAZER/prowlpy"
+"Bug Reports" = "https://github.com/OMEGARAZER/prowlpy/issues"
+
+[dependency-groups]
+cli = [
+    "click>=8.1.8",
+    "loguru>=0.7.3",
+]
+lint = [
+    "refurb>=2.0.0",
+    "ruff>=0.11.2",
+]
+type = [
+    "mypy>=1.15.0",
+    "pyright>=1.1.397",
+    "types-xmltodict>=0.14.0.20241009",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "respx>=0.22.0",
+]
+
+[tool.knot]
+environment.python = ".venv"
+environment.python-version = "3.10"
+terminal.output-format = "full"
+rules.possibly-unresolved-reference = "ignore"
+
+[tool.mypy]
+python_version = "3.10"
+show_column_numbers = true
+show_error_context = true
+
+[tool.pyright]
+pythonVersion = "3.10"
+reportPossiblyUnboundVariable = false
+typeCheckingMode = "standard"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "--cov=prowlpy --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.refurb]
+enable_all = true
+python_version = "3.10"
+
+[tool.ruff]
+extend-exclude = []
+line-length = 120
+lint.flake8-annotations = {"suppress-dummy-args" = true}
+lint.ignore = ["CPY", "D212", "EM", "FBT001", "TRY"]
+lint.per-file-ignores = {"tests/*" = ["ANN201", "ARG001", "DOC201", "DOC402", "DOC501", "INP001", "S101", "S105"], "Examples/*" = ["INP", "T201"]}
+lint.pydocstyle = {"convention" = "google"}
+lint.pylint = {"allow-magic-value-types" = ["bytes", "int", "str"], "max-args" = 7, "max-positional-args" = 7}
+lint.select = ["ALL"]
+output-format = "full"
+preview = true
+show-fixes = true
+target-version = "py310"
