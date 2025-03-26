@@ -15,7 +15,7 @@ from typing import NoReturn
 import httpx
 import xmltodict
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 class APIError(Exception):

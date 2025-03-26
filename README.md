@@ -11,9 +11,15 @@ Python library to interface with the [Prowl](https://www.prowlapp.com/) API.
 
 ## Installation
 
-Prowlpy is currently only installable as a library to be used within scripts or apps. A CLI option may be added in the future.
+Prowlpy is installable as a library to be used within scripts or apps or with a CLI to send messages from the command line.
 
 To install user/system wide use `pip install prowlpy` otherwise add it as normal to your pyproject.toml or requirements.txt
+
+The CLI is not installed by default. You can include it when installing. Using [uv](https://github.com/astral-sh/uv) you would use this command:
+
+```bash
+uv tool install prowlpy[cli]
+```
 
 ## Usage
 
@@ -82,10 +88,4 @@ The CLI can be used to send massages via Prowl like this:
 
 ```bash
 prowlpy --apikey="1234567890123456789012345678901234567890" --application="Test App" --event="Testing" --description="This is a test message"
-```
-
-You can install prowlpy with the CLI through your package manager. Using [uv](https://github.com/astral-sh/uv) you would use this command:
-
-```bash
-uv tool install prowlpy[cli]
 ```
