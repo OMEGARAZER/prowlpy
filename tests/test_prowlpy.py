@@ -5,50 +5,10 @@ import respx
 from httpx import Response, TransportError
 
 from prowlpy import APIError, MissingKeyError, Prowl
-
-# Test data
-VALID_API_KEY = "0123456789abcdef0123456789abcdef01234567"
-VALID_PROVIDER_KEY = "76543210fedcba9876543210fedcba9876543210"
-VALID_TOKEN = "1234567890123456789012345678901234567890"
-
-# Mock API responses
-SUCCESS_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
-<prowl>
-    <success code="200" remaining="994" resetdate="1234567890"/>
-</prowl>"""
-
-TOKEN_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
-<prowl>
-    <success code="200" remaining="994" resetdate="1234567890"/>
-    <retrieve token="1234567890123456789012345678901234567890"  url="https://www.prowlapp.com/retrieve.php?token=1234567890123456789012345678901234567890"/>
-</prowl>"""
-
-APIKEY_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
-<prowl>
-    <success code="200" remaining="994" resetdate="1234567890"/>
-    <retrieve apikey="0123456789abcdef0123456789abcdef01234567"/>
-</prowl>"""
-
-INVALID_XML_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
-<prowl>
-    <invalid>Invalid XML structure</invalid>
-</prowl>"""
+from tests.constants import VALID_API_KEY, VALID_PROVIDER_KEY, VALID_TOKEN, SUCCESS_RESPONSE, TOKEN_RESPONSE, APIKEY_RESPONSE, INVALID_XML_RESPONSE
 
 
-@pytest.fixture
-def prowl():
-    """Create a Prowl instance with a valid API key."""
-    return Prowl(apikey=VALID_API_KEY)
-
-
-@pytest.fixture
-def mock_api():
-    """Set up mock API responses."""
-    with respx.mock(base_url="https://api.prowlapp.com/publicapi", assert_all_mocked=True) as respx_mock:
-        yield respx_mock
-
-
-def test_init_with_valid_apikey() -> None:
+def test_init_with_valid_apikey(prowl) -> None:
     """Test initialization with valid API key."""
     prowl = Prowl(apikey=VALID_API_KEY)
     assert prowl.apikey == VALID_API_KEY
