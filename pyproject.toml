@@ -61,7 +61,8 @@ type = [
 test = [
     "pytest>=8.3.5",
     "pytest-cov>=6.0.0",
-    "respx>=0.22.0",
+    "pytest-trio>=0.8.0",
+    "respx>=0.22.0"
 ]
 
 [tool.knot]

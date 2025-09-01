@@ -9,7 +9,7 @@ Typical usage:
     p.post(application="My App", event="Important Event", description="Successful Event")
 """
 
-from .prowlpy import APIError, MissingKeyError, Prowl
+from .prowlpy import APIError, MissingKeyError, Prowl, AsyncProwl
 
 try:
     from ._cli import main
@@ -25,4 +25,4 @@ except ImportError:
         sys.exit(1)
 
 
-__all__ = ["APIError", "MissingKeyError", "Prowl", "main"]
+__all__ = ["APIError", "MissingKeyError", "Prowl", "AsyncProwl", "main"]
