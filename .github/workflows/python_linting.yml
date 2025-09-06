@@ -16,12 +16,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Setup uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v6
       with:
-        pyproject-file : "pyproject.toml"
         version: "latest"
+        version-file : "pyproject.toml"
 
     - name: Ruff formatting check
       run: |

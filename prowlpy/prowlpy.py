@@ -72,7 +72,7 @@ class Prowl:
         if not apikey and not providerkey:
             raise MissingKeyError("API Key or Provider Key are required.")
         if isinstance(apikey, list | tuple):
-            self.apikey = ",".join(apikey)
+            self.apikey = ",".join(apikey)  # ty: ignore[no-matching-overload]
         else:
             self.apikey = apikey
         self.providerkey = providerkey
@@ -177,7 +177,7 @@ class Prowl:
             raise ValueError("Must provide event, description or both.")
         if priority not in {-2, -1, 0, 1, 2}:
             raise ValueError(f"Priority must be between -2 and 2, got {priority}")
-        data = {
+        rawdata = {
             "apikey": self.apikey,
             "application": application,
             "event": event,
@@ -185,12 +185,12 @@ class Prowl:
             "priority": priority,
         }
         if providerkey:
-            data["providerkey"] = providerkey
+            rawdata["providerkey"] = providerkey
         elif self.providerkey:
-            data["providerkey"] = self.providerkey
+            rawdata["providerkey"] = self.providerkey
         if url:
-            data["url"] = url[0:512]  # Prowl has a 512 character limit on the URL.
-        data = {key: value for key, value in data.items() if value is not None}
+            rawdata["url"] = url[0:512]  # Prowl has a 512 character limit on the URL.
+        data = {key: value for key, value in rawdata.items() if value is not None}
 
         try:
             response = self.client.post("/add", params=data)
@@ -199,7 +199,7 @@ class Prowl:
         except httpx.RequestError as error:
             raise APIError(f"API connection error: {error}") from error
 
-        return xmltodict.parse(response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
+        return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
 
     def verify_key(self, providerkey: str | None = None) -> dict:
         """
@@ -227,7 +227,7 @@ class Prowl:
         if not response.is_success:
             self._api_error_handler(response.status_code)
 
-        return xmltodict.parse(response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
+        return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
 
     def retrieve_token(self, providerkey: str | None = None) -> dict:
         """

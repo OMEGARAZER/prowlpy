@@ -47,21 +47,21 @@ prowlpy = "prowlpy:main"
 
 [dependency-groups]
 cli = [
-    "click>=8.1.8",
+    "click>=8.2.1",
     "loguru>=0.7.3",
 ]
 lint = [
-    "refurb>=2.0.0",
-    "ruff>=0.11.2",
+    "refurb>=2.1.0",
+    "ruff>=0.12.12",
 ]
 type = [
-    "mypy>=1.15.0",
-    "pyright>=1.1.397",
+    "mypy>=1.17.1",
+    "pyright>=1.1.405",
     "types-xmltodict>=0.14.0.20241009",
 ]
 test = [
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=6.3.0",
     "respx>=0.22.0",
 ]
 

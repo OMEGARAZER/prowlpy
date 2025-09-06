@@ -62,7 +62,7 @@ def print_help() -> None:
 @click.option("application", "--application", "-a", type=str, default=None)
 @click.option("event", "--event", "-e", type=str, default=None)
 @click.option("description", "--description", "-d", type=str, default=None)
-@click.option("priority", "--priority", "-p", type=click.IntRange(-2, 2, clamp=True), default=0)
+@click.option("priority", "--priority", "-p", type=click.IntRange(min=-2, max=2, clamp=True), default=0)
 @click.option("url", "--url", "-u", type=str, default=None)
 @click.option("version", "--version", "-v", is_flag=True, is_eager=True, expose_value=False, callback=_check_version)
 @click.option("help", "--help", "-h", is_flag=True, is_eager=True, expose_value=False, callback=_help)
@@ -78,7 +78,7 @@ def main(
 ) -> None:
     if len(sys.argv) == 1:
         print_help()
-        context.exit(1)
+        context.exit(code=1)
     try:
         with Prowl(apikey=apikey) as prowl:
             response = prowl.send(
