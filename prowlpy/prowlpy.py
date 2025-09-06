@@ -19,7 +19,23 @@ __version__ = "1.0.1"
 
 
 class APIError(Exception):
-    """Prowl API error."""
+    """Prowl API error base class."""
+
+
+class BadRequestError(APIError):
+    """Bad Request: The parameters you provided did not validate."""
+
+
+class InvalidAPIKeyError(APIError):
+    """Invalid API key."""
+
+
+class RateLimitExceededError(APIError):
+    """Not accepted: Your IP address has exceeded the API limit."""
+
+
+class NotApprovedError(APIError):
+    """Not approved: The user has yet to approve your retrieve request."""
 
 
 class MissingKeyError(Exception):
@@ -102,28 +118,26 @@ class Prowl:
         Errors from http://www.prowlapp.com/api.php
 
         Raises:
-            APIError:
-                400: Bad Request: The parameters you provided did not validate.
-                401: Invalid API key: apikey.
-                406: Not accepted: Your IP address has exceeded the API limit.
-                409: Not approved: The user has yet to approve your retrieve request.
-                500: Internal server error.
-        """  # noqa: DOC502
-        exception = f"Unknown API error: Error code {error_code}"
-        if error_code == 400:
-            exception = "Bad Request: The parameters you provided did not validate"
-        if error_code == 401:
-            exception = f"Invalid API key: {self.apikey}"
-        if error_code == 406:
-            exception = "Not accepted: Your IP address has exceeded the API limit"
-        if error_code == 409:
-            exception = "Not approved: The user has yet to approve your retrieve request"
-        if error_code == 500:
-            exception = "Internal server error"
+            BadRequestError: The parameters you provided did not validate.
+            InvalidAPIKeyError: Invalid API key: apikey.
+            RateLimitExceededError: Not accepted: Your IP address has exceeded the API limit.
+            NotApprovedError: Not approved: The user has yet to approve your retrieve request.
+            APIError: Internal server error.
+        """
         if reason:
-            exception = f"{exception} - {reason}"
+            reason = f" - {reason}"
+        if error_code == 400:
+            raise BadRequestError(f"Bad Request: The parameters you provided did not validate{reason}")
+        if error_code == 401:
+            raise InvalidAPIKeyError(f"Invalid API key: {self.apikey}{reason}")
+        if error_code == 406:
+            raise RateLimitExceededError(f"Not accepted: Your IP address has exceeded the API limit{reason}")
+        if error_code == 409:
+            raise NotApprovedError(f"Not approved: The user has yet to approve your retrieve request{reason}")
+        if error_code == 500:
+            raise APIError(f"Internal server error{reason}")
 
-        raise APIError(exception)
+        raise APIError(f"Unknown API error: Error code {error_code}")
 
     def post(
         self,
