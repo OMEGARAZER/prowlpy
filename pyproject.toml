@@ -8,7 +8,8 @@ authors = [{name = "OMEGA_RAZER"}]
 description = "Prowlpy is a python library that implements the public api of Prowl to send push notification to iPhones."
 keywords = ["prowl", "push", "notification", "iphone"]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Operating System :: OS Independent",
