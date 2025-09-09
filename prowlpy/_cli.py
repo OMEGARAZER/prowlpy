@@ -16,7 +16,7 @@ def _check_version(context: click.Context, _param: click.Parameter, value: bool)
         return
     try:
         with Client(base_url="https://pypi.org/pypi", http2=True) as client:
-            latest = client.get("/prowlpy/json").json()["info"]["version"]
+            latest: str = client.get(url="/prowlpy/json").json()["info"]["version"]
             logger.info("You are currently using v{} the latest is v{}", __version__, latest)
     except TimeoutError:
         logger.info("Timeout reached fetching current version from Pypi - Prowlpy v{}", __version__)
@@ -81,7 +81,7 @@ def main(
         context.exit(code=1)
     try:
         with Prowl(apikey=apikey) as prowl:
-            response = prowl.send(
+            response: dict[str, str] = prowl.send(
                 application=application,
                 event=event,
                 description=description,

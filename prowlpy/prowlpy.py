@@ -15,7 +15,7 @@ from typing import NoReturn
 import httpx
 import xmltodict
 
-__version__ = "1.0.1"
+__version__: str = "1.0.2"
 
 
 class APIError(Exception):
@@ -76,10 +76,12 @@ class Prowl:
         else:
             self.apikey = apikey
         self.providerkey = providerkey
-        self.headers = httpx.Headers({
-            "User-Agent": f"Prowlpy/{__version__}",
-            "Content-Type": "application/x-www-form-urlencoded",
-        })
+        self.headers = httpx.Headers(
+            headers={
+                "User-Agent": f"Prowlpy/{__version__}",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        )
         self.client = httpx.Client(base_url="https://api.prowlapp.com/publicapi", headers=self.headers, http2=True)
 
     def __enter__(self) -> "Prowl":
@@ -177,7 +179,7 @@ class Prowl:
             raise ValueError("Must provide event, description or both.")
         if priority not in {-2, -1, 0, 1, 2}:
             raise ValueError(f"Priority must be between -2 and 2, got {priority}")
-        rawdata = {
+        rawdata: dict[str, str | int | None] = {
             "apikey": self.apikey,
             "application": application,
             "event": event,
@@ -190,10 +192,10 @@ class Prowl:
             rawdata["providerkey"] = self.providerkey
         if url:
             rawdata["url"] = url[0:512]  # Prowl has a 512 character limit on the URL.
-        data = {key: value for key, value in rawdata.items() if value is not None}
+        data: dict[str, str | int] = {key: value for key, value in rawdata.items() if value is not None}
 
         try:
-            response = self.client.post("/add", params=data)
+            response: httpx.Response = self.client.post("/add", params=data)
             if not response.is_success:
                 self._api_error_handler(response.status_code, response.text)
         except httpx.RequestError as error:
@@ -216,13 +218,13 @@ class Prowl:
         """
         if not self.apikey:
             raise MissingKeyError("API Key is required.")
-        data = {"apikey": self.apikey}
+        data: dict[str, str] = {"apikey": self.apikey}
         if providerkey:
             data["providerkey"] = providerkey
         elif self.providerkey:
             data["providerkey"] = self.providerkey
 
-        response = self.client.get("/verify", params=data)
+        response: httpx.Response = self.client.get("/verify", params=data)
 
         if not response.is_success:
             self._api_error_handler(response.status_code)
@@ -246,7 +248,7 @@ class Prowl:
         Raises:
             MissingKeyError: If Provider key is missing.
         """
-        data = {}
+        data: dict[str, str] = {}
         if self.apikey:
             data["apikey"] = self.apikey
         if providerkey:
@@ -256,13 +258,17 @@ class Prowl:
         else:
             raise MissingKeyError("Provider key is required to retrieve Token.")
 
-        response = self.client.get("/retrieve/token", params=data)
+        response: httpx.Response = self.client.get("/retrieve/token", params=data)
 
         if not response.is_success:
             self._api_error_handler(response.status_code)
 
-        rateinfo = xmltodict.parse(response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
-        token = xmltodict.parse(response.text, attr_prefix="", cdata_key="text")["prowl"]["retrieve"]
+        rateinfo: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
+            "success"
+        ]
+        token: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
+            "retrieve"
+        ]
         return token | rateinfo
 
     def retrieve_apikey(self, token: str, providerkey: str | None = None) -> dict:
@@ -282,7 +288,7 @@ class Prowl:
         Raises:
             MissingKeyError: If provider key or token are missing.
         """
-        data = {}
+        data: dict[str, str] = {}
         if self.apikey:
             data["apikey"] = self.apikey
         if providerkey:
@@ -296,11 +302,15 @@ class Prowl:
         else:
             raise MissingKeyError("Token is required to retrieve API key. Call retrieve_teken to request it.")
 
-        response = self.client.get("retrieve/apikey", params=data)
+        response: httpx.Response = self.client.get("retrieve/apikey", params=data)
 
         if not response.is_success:
             self._api_error_handler(response.status_code)
 
-        rateinfo = xmltodict.parse(response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
-        apikey = xmltodict.parse(response.text, attr_prefix="", cdata_key="text")["prowl"]["retrieve"]
+        rateinfo: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
+            "success"
+        ]
+        apikey: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
+            "retrieve"
+        ]
         return apikey | rateinfo

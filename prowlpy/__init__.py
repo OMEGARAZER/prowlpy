@@ -25,4 +25,4 @@ except ImportError:
         sys.exit(1)
 
 
-__all__ = ["APIError", "MissingKeyError", "Prowl", "main"]
+__all__: list[str] = ["APIError", "MissingKeyError", "Prowl", "main"]
