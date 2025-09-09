@@ -9,7 +9,15 @@ Typical usage:
     p.post(application="My App", event="Important Event", description="Successful Event")
 """
 
-from .prowlpy import APIError, MissingKeyError, Prowl
+from .prowlpy import (
+    APIError,
+    BadRequestError,
+    InvalidAPIKeyError,
+    MissingKeyError,
+    NotApprovedError,
+    Prowl,
+    RateLimitExceededError,
+)
 
 try:
     from ._cli import main
@@ -25,4 +33,13 @@ except ImportError:
         sys.exit(1)
 
 
-__all__: list[str] = ["APIError", "MissingKeyError", "Prowl", "main"]
+__all__: list[str] = [
+    "APIError",
+    "BadRequestError",
+    "InvalidAPIKeyError",
+    "MissingKeyError",
+    "NotApprovedError",
+    "Prowl",
+    "RateLimitExceededError",
+    "main",
+]
