@@ -9,13 +9,23 @@ Typical usage:
     p.post(application="My App", event="Important Event", description="Successful Event")
 """
 
-from .prowlpy import APIError, MissingKeyError, Prowl
+from .prowlpy import (
+    APIError,
+    AsyncProwl,
+    BadRequestError,
+    InvalidAPIKeyError,
+    MissingKeyError,
+    NotApprovedError,
+    Prowl,
+    RateLimitExceededError,
+)
 
 try:
     from ._cli import main
 except ImportError:
 
-    def main() -> None:  # noqa: D103
+    def main() -> None:  # type: ignore[misc]
+        """Fallback main if cli components not installed."""
         import sys  # noqa: PLC0415
 
         print(  # noqa: T201
@@ -25,4 +35,14 @@ except ImportError:
         sys.exit(1)
 
 
-__all__: list[str] = ["APIError", "MissingKeyError", "Prowl", "main"]
+__all__: list[str] = [
+    "APIError",
+    "AsyncProwl",
+    "BadRequestError",
+    "InvalidAPIKeyError",
+    "MissingKeyError",
+    "NotApprovedError",
+    "Prowl",
+    "RateLimitExceededError",
+    "main",
+]

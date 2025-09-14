@@ -26,7 +26,7 @@ def mock_prowl_api():
     with respx.mock(assert_all_mocked=True) as respx_mock:
         respx_mock.post("https://api.prowlapp.com/publicapi/add").mock(
             return_value=Response(
-                200,
+                status_code=200,
                 text='<?xml version="1.0" encoding="UTF-8"?><prowl><success code="200" remaining="999" '
                 'resetdate="1735714800"/></prowl>',
             ),
@@ -40,7 +40,7 @@ def mock_pypi_api():
     with respx.mock(assert_all_mocked=True) as respx_mock:
         respx_mock.get("https://pypi.org/pypi/prowlpy/json").mock(
             return_value=Response(
-                200,
+                status_code=200,
                 json={"info": {"version": __version__}},
             ),
         )
@@ -49,7 +49,7 @@ def mock_pypi_api():
 
 def test_help_output():
     """Test call to --help."""
-    result = CliRunner().invoke(main, ["--help"])
+    result = CliRunner().invoke(cli=main, args=["--help"])
     assert result.exit_code == 0
     assert "Prowlpy" in result.output
     assert "--apikey" in result.output
@@ -58,7 +58,7 @@ def test_help_output():
 
 def test_version_check(mock_pypi_api):  # noqa: ANN001
     """Test call to --version."""
-    result = CliRunner().invoke(main, ["--version"])
+    result = CliRunner().invoke(cli=main, args=["--version"])
     assert result.exit_code == 0
     assert "You are currently using v" in result.output
     assert mock_pypi_api.calls.last.response.json()["info"]["version"] == __version__
@@ -69,7 +69,7 @@ def test_no_arguments():
     original_argv = sys.argv
     try:
         sys.argv = ["prowlpy.py"]
-        result = CliRunner().invoke(main)
+        result = CliRunner().invoke(cli=main)
         assert result.exit_code == 1
         assert "Prowlpy" in result.output
     finally:
@@ -79,8 +79,8 @@ def test_no_arguments():
 def test_successful_message_send(mock_prowl_api):  # noqa: ANN001
     """Test for successful message."""
     result = CliRunner().invoke(
-        main,
-        [
+        cli=main,
+        args=[
             "--apikey",
             "test_key",
             "--application",
@@ -99,7 +99,7 @@ def test_successful_message_send(mock_prowl_api):  # noqa: ANN001
 
 def test_missing_required_params():
     """Test with missing Application name."""
-    result = CliRunner().invoke(main, ["--apikey", "test_key"])
+    result = CliRunner().invoke(cli=main, args=["--apikey", "test_key"])
     assert result.exit_code == 1
     assert "Must provide application" in result.output
 
@@ -107,8 +107,8 @@ def test_missing_required_params():
 def test_invalid_priority(mock_prowl_api):  # noqa: ANN001
     """Test with invalid/clamped priority."""
     result = CliRunner().invoke(
-        main,
-        [
+        cli=main,
+        args=[
             "--apikey",
             "test_key",
             "--application",
@@ -128,7 +128,7 @@ def test_pypi_timeout():
     """Test timeout in version check."""
     with respx.mock(assert_all_mocked=True) as respx_mock:
         respx_mock.get("https://pypi.org/pypi/prowlpy/json").mock(side_effect=TimeoutError)
-        result = CliRunner().invoke(main, ["--version"])
+        result = CliRunner().invoke(cli=main, args=["--version"])
         assert result.exit_code == 0
         assert "Timeout reached fetching current version" in result.output
 
@@ -136,8 +136,8 @@ def test_pypi_timeout():
 def test_multiple_apikeys(mock_prowl_api):  # noqa: ANN001
     """Test with multiple API keys set."""
     result = CliRunner().invoke(
-        main,
-        [
+        cli=main,
+        args=[
             "--apikey",
             "key1",
             "--apikey",

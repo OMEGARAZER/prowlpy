@@ -27,6 +27,10 @@ Prowlpy can be used in multiple ways.
 
 ### library
 
+#### Sync or Async
+
+Both sync and async versions of the library are available. To use async, replace Prowl with AsyncProwl
+
 #### Sending messages
 
 ```python

@@ -1,5 +1,15 @@
 # Prowlpy changelog
 
+## 1.1.0
+
+Add AsyncProwl version of library.
+Thanks to @mgust for the base work in #2
+
+## 1.0.2
+
+API Exception Classes by @mgust in #1
+Updating the license field format by @mgust in #3
+
 ## 1.0.1
 
 Readme fix, other minor maintenance fixes.
