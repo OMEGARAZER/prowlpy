@@ -357,13 +357,8 @@ class Prowl(ProwlpyCore):
 
         response: httpx.Response = self._make_request(method="get", url="/retrieve/token", data=data)
 
-        rateinfo: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "success"
-        ]
-        token: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "retrieve"
-        ]
-        return token | rateinfo
+        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        return parsed["retrieve"] | parsed["success"]
 
     def retrieve_apikey(self, token: str, providerkey: str | None = None) -> dict[str, str]:
         """
@@ -383,13 +378,8 @@ class Prowl(ProwlpyCore):
 
         response: httpx.Response = self._make_request(method="get", url="retrieve/apikey", data=data)
 
-        rateinfo: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "success"
-        ]
-        apikey: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "retrieve"
-        ]
-        return apikey | rateinfo
+        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        return parsed["retrieve"] | parsed["success"]
 
 
 class AsyncProwl(ProwlpyCore):
@@ -544,13 +534,8 @@ class AsyncProwl(ProwlpyCore):
 
         response: httpx.Response = await self._make_request(method="get", url="/retrieve/token", data=data)
 
-        rateinfo: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "success"
-        ]
-        token: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "retrieve"
-        ]
-        return token | rateinfo
+        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        return parsed["retrieve"] | parsed["success"]
 
     async def retrieve_apikey(self, token: str, providerkey: str | None = None) -> dict[str, str]:
         """
@@ -570,10 +555,5 @@ class AsyncProwl(ProwlpyCore):
 
         response: httpx.Response = await self._make_request(method="get", url="retrieve/apikey", data=data)
 
-        rateinfo: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "success"
-        ]
-        apikey: dict[str, str] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"][
-            "retrieve"
-        ]
-        return apikey | rateinfo
+        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        return parsed["retrieve"] | parsed["success"]
