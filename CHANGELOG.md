@@ -1,5 +1,9 @@
 # Prowlpy changelog
 
+## 1.1.1
+
+Add ability to pass through an already initialized httpx client.
+
 ## 1.1.0
 
 Add AsyncProwl version of library.

@@ -9,13 +9,13 @@ repos:
         name: validate-pyproject
 
   - repo: https://github.com/dosisod/refurb
-    rev: v2.1.0
+    rev: v2.2.0
     hooks:
       - id: refurb
         name: refurb
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: v0.13.1
     hooks:
       - id: ruff
         name: ruff lint
@@ -39,7 +39,7 @@ repos:
           - ruff
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.17
+    rev: 0.8.21
     hooks:
       - id: uv-lock
       - id: uv-export

@@ -10,12 +10,12 @@ Typical usage:
 """
 
 import types
-from typing import NoReturn
+from typing import Any, NoReturn
 
 import httpx
 import xmltodict
 
-__version__: str = "1.1.0"
+__version__: str = "1.1.1"
 
 
 class APIError(Exception):
@@ -215,17 +215,23 @@ class Prowl(ProwlpyCore):
         retrieve_apikey: Generate an API key from registration token.
     """
 
-    def __init__(self, apikey: str | list[str] | None = None, providerkey: str | None = None) -> None:
+    def __init__(
+        self,
+        apikey: str | list[str] | None = None,
+        providerkey: str | None = None,
+        client: Any = None,  # noqa: ANN401
+    ) -> None:
         """
         Initialize a Prowl object with an API key and optionally a Provider key.
 
         Args:
             apikey (str): Your Prowl API key.
             providerkey (str, optional): Your provider API key, only required if you are whitelisted.
+            client (optional): HTTP client if you would like to use your own. Must be compatible with the httpx api.
         """
         self.add = self.send = self.post
         super().__init__(apikey=apikey, providerkey=providerkey)
-        self.client = httpx.Client(base_url=self.baseurl, headers=self.headers, http2=True)
+        self.client = client or httpx.Client(http2=True)
 
     def __enter__(self) -> "Prowl":
         """
@@ -276,7 +282,7 @@ class Prowl(ProwlpyCore):
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
         request_client = getattr(self.client, method.lower())
         try:
-            response: httpx.Response = request_client(url=url, params=data)
+            response: httpx.Response = request_client(url=url, params=data, headers=self.headers)
             if not response.is_success:
                 self._api_error_handler(response.status_code, response.text)
             return response
@@ -319,7 +325,7 @@ class Prowl(ProwlpyCore):
             url=url,
         )
 
-        response: httpx.Response = self._make_request(method="post", url="/add", data=data)
+        response: httpx.Response = self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
 
         return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
 
@@ -335,7 +341,7 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="verify", providerkey=providerkey)
 
-        response: httpx.Response = self._make_request(method="get", url="/verify", data=data)
+        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
 
         return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
 
@@ -355,7 +361,7 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="token", providerkey=providerkey)
 
-        response: httpx.Response = self._make_request(method="get", url="/retrieve/token", data=data)
+        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/retrieve/token", data=data)
 
         parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
         return parsed["retrieve"] | parsed["success"]
@@ -376,7 +382,7 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="key", providerkey=providerkey, token=token)
 
-        response: httpx.Response = self._make_request(method="get", url="retrieve/apikey", data=data)
+        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}retrieve/apikey", data=data)
 
         parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
         return parsed["retrieve"] | parsed["success"]
@@ -397,17 +403,23 @@ class AsyncProwl(ProwlpyCore):
         retrieve_apikey: Generate an API key from registration token.
     """
 
-    def __init__(self, apikey: str | list[str] | None = None, providerkey: str | None = None) -> None:
+    def __init__(
+        self,
+        apikey: str | list[str] | None = None,
+        providerkey: str | None = None,
+        client: Any = None,  # noqa: ANN401
+    ) -> None:
         """
         Initialize an AsyncProwl object with an API key and optionally a Provider key.
 
         Args:
             apikey (str): Your Prowl API key.
             providerkey (str, optional): Your provider API key, only required if you are whitelisted.
+            client (optional): HTTP client if you would like to use your own. Must be compatible with the httpx api.
         """
         self.add = self.send = self.post
         super().__init__(apikey=apikey, providerkey=providerkey)
-        self.client = httpx.AsyncClient(base_url=self.baseurl, headers=self.headers, http2=True)
+        self.client = client or httpx.AsyncClient(http2=True)
 
     async def __aenter__(self) -> "AsyncProwl":
         """
@@ -454,7 +466,7 @@ class AsyncProwl(ProwlpyCore):
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
         request_client = getattr(self.client, method.lower())
         try:
-            response: httpx.Response = await request_client(url=url, params=data)
+            response: httpx.Response = await request_client(url=url, params=data, headers=self.headers)
             if not response.is_success:
                 self._api_error_handler(response.status_code, response.text)
             return response
@@ -496,7 +508,7 @@ class AsyncProwl(ProwlpyCore):
             url=url,
         )
 
-        response: httpx.Response = await self._make_request(method="post", url="/add", data=data)
+        response: httpx.Response = await self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
 
         return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
 
@@ -512,7 +524,7 @@ class AsyncProwl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="verify", providerkey=providerkey)
 
-        response: httpx.Response = await self._make_request(method="get", url="/verify", data=data)
+        response: httpx.Response = await self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
 
         return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
 
@@ -532,7 +544,11 @@ class AsyncProwl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="token", providerkey=providerkey)
 
-        response: httpx.Response = await self._make_request(method="get", url="/retrieve/token", data=data)
+        response: httpx.Response = await self._make_request(
+            method="get",
+            url=f"{self.baseurl}/retrieve/token",
+            data=data,
+        )
 
         parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
         return parsed["retrieve"] | parsed["success"]
@@ -553,7 +569,11 @@ class AsyncProwl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="key", providerkey=providerkey, token=token)
 
-        response: httpx.Response = await self._make_request(method="get", url="retrieve/apikey", data=data)
+        response: httpx.Response = await self._make_request(
+            method="get",
+            url=f"{self.baseurl}retrieve/apikey",
+            data=data,
+        )
 
         parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
         return parsed["retrieve"] | parsed["success"]

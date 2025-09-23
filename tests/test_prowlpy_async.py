@@ -2,7 +2,7 @@
 
 import pytest
 import respx
-from httpx import Response, TransportError
+from httpx import AsyncClient, Response, TransportError
 
 from prowlpy import APIError, AsyncProwl, MissingKeyError
 from tests.constants import (
@@ -358,3 +358,13 @@ async def test_async_make_request_invalid_method() -> None:
     prowl = AsyncProwl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=ValueError, match="Invalid method type"):
         await prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # noqa: SLF001
+
+
+@pytest.mark.asyncio
+async def test_async_client_passthrough(mock_api: respx.Router) -> None:
+    """Test with client passed through to library."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
+
+    client = AsyncClient()
+    prowl = AsyncProwl(apikey=VALID_API_KEY, client=client)
+    await prowl.post(application="Test App", event="Test Event", description="Test Description")
