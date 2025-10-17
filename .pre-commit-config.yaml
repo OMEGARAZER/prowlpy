@@ -15,7 +15,7 @@ repos:
         name: refurb
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.1
+    rev: v0.14.1
     hooks:
       - id: ruff
         name: ruff lint
@@ -30,7 +30,7 @@ repos:
         name: markdownlint
 
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.22
+    rev: 1.0.0
     hooks:
       - id: mdformat
         name: mdformat-ruff
@@ -39,7 +39,7 @@ repos:
           - ruff
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.21
+    rev: 0.9.3
     hooks:
       - id: uv-lock
       - id: uv-export

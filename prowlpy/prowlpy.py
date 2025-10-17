@@ -15,7 +15,7 @@ from typing import Any, NoReturn
 import httpx
 import xmltodict
 
-__version__: str = "1.1.1"
+__version__: str = "1.1.2"
 
 
 class APIError(Exception):
@@ -285,9 +285,10 @@ class Prowl(ProwlpyCore):
             response: httpx.Response = request_client(url=url, params=data, headers=self.headers)
             if not response.is_success:
                 self._api_error_handler(response.status_code, response.text)
-            return response
         except httpx.RequestError as error:
             raise APIError(f"API connection error: {error}") from error
+        else:
+            return response
 
     def post(
         self,
@@ -469,9 +470,10 @@ class AsyncProwl(ProwlpyCore):
             response: httpx.Response = await request_client(url=url, params=data, headers=self.headers)
             if not response.is_success:
                 self._api_error_handler(response.status_code, response.text)
-            return response
         except httpx.RequestError as error:
             raise APIError(f"API connection error: {error}") from error
+        else:
+            return response
 
     async def post(
         self,

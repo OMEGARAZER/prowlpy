@@ -72,6 +72,22 @@ def test_post_notification_success(mock_api: respx.Router) -> None:
     prowl.post(application="Test App", event="Test Event", description="Test Description")
 
 
+def test_send_notification_success(mock_api: respx.Router) -> None:
+    """Test successful notification send."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
+
+    prowl = Prowl(apikey=VALID_API_KEY)
+    prowl.send(application="Test App", event="Test Event", description="Test Description")
+
+
+def test_add_notification_success(mock_api: respx.Router) -> None:
+    """Test successful notification add."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
+
+    prowl = Prowl(apikey=VALID_API_KEY)
+    prowl.add(application="Test App", event="Test Event", description="Test Description")
+
+
 def test_post_notification_without_apikey() -> None:
     """Test notification post without apikey."""
     prowl = Prowl(providerkey=VALID_PROVIDER_KEY)

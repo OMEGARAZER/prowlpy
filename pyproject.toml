@@ -52,11 +52,11 @@ cli = [
 ]
 lint = [
     "refurb>=2.2.0",
-    "ruff>=0.13.1",
+    "ruff>=0.14.1",
 ]
 type = [
     "mypy>=1.18.2",
-    "pyright>=1.1.405",
+    "pyright>=1.1.406",
     "types-xmltodict>=1.0.1.20250920",
 ]
 test = [
@@ -88,7 +88,7 @@ python_version = "3.10"
 extend-exclude = []
 line-length = 120
 lint.flake8-annotations = {"suppress-dummy-args" = true}
-lint.ignore = ["CPY", "D212", "EM", "FBT001", "TRY"]
+lint.ignore = ["CPY", "D212", "EM", "FBT001", "TRY0"]
 lint.per-file-ignores = {"tests/*" = ["ANN201", "ARG001", "DOC201", "DOC402", "DOC501", "INP001", "S101", "S105"], "Examples/*" = ["INP", "T201"]}
 lint.pydocstyle = {"convention" = "google"}
 lint.pylint = {"allow-magic-value-types" = ["bytes", "int", "str"], "max-args" = 8, "max-positional-args" = 8}

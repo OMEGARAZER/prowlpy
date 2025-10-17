@@ -77,6 +77,24 @@ async def test_async_post_notification_success(mock_api: respx.Router) -> None:
 
 
 @pytest.mark.asyncio
+async def test_async_send_notification_success(mock_api: respx.Router) -> None:
+    """Test successful notification send."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
+
+    prowl = AsyncProwl(apikey=VALID_API_KEY)
+    await prowl.send(application="Test App", event="Test Event", description="Test Description")
+
+
+@pytest.mark.asyncio
+async def test_async_add_notification_success(mock_api: respx.Router) -> None:
+    """Test successful notification add."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
+
+    prowl = AsyncProwl(apikey=VALID_API_KEY)
+    await prowl.add(application="Test App", event="Test Event", description="Test Description")
+
+
+@pytest.mark.asyncio
 async def test_async_post_notification_without_apikey() -> None:
     """Test notification post without apikey."""
     prowl = AsyncProwl(providerkey=VALID_PROVIDER_KEY)
