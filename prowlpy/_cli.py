@@ -81,7 +81,7 @@ def main(
         context.exit(code=1)
     try:
         with Prowl(apikey=apikey) as prowl:
-            response: dict[str, str] = prowl.send(
+            response: dict[str, str] = prowl.post(
                 application=application,
                 event=event,
                 description=description,

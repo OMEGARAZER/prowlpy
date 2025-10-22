@@ -10,12 +10,13 @@ Typical usage:
 """
 
 import types
+from collections.abc import Callable, Coroutine
 from typing import Any, NoReturn
 
 import httpx
 import xmltodict
 
-__version__: str = "1.1.2"
+__version__: str = "1.1.3"
 
 
 class APIError(Exception):
@@ -57,12 +58,12 @@ class ProwlpyCore:
         """
         if not apikey and not providerkey:
             raise MissingKeyError("API Key or Provider Key are required.")
-        if isinstance(apikey, list | tuple):
-            self.apikey = ",".join(apikey)
+        if isinstance(apikey, (list, tuple)):
+            self.apikey: str | None = ",".join(apikey)
         else:
-            self.apikey = apikey  # type: ignore[assignment]
-        self.providerkey = providerkey
-        self.headers = httpx.Headers(
+            self.apikey = apikey
+        self.providerkey: str | None = providerkey
+        self.headers: httpx.Headers = httpx.Headers(
             headers={
                 "User-Agent": f"Prowlpy/{__version__}",
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -159,7 +160,12 @@ class ProwlpyCore:
         data["token"] = token
         return {key: value for key, value in data.items() if value is not None}
 
-    def _make_request(self, *args, **kwargs):  # pragma: no cover  # noqa: ANN002, ANN003, ANN202
+    def _make_request(  # pragma: nocover
+        self,
+        method: str,
+        url: str,
+        data: dict[str, str | int],
+    ) -> httpx.Response | Coroutine[Any, Any, httpx.Response]:
         """
         Make request to Prowl API.
 
@@ -167,7 +173,15 @@ class ProwlpyCore:
         """
         raise NotImplementedError("This method should be implemented in subclasses.")
 
-    def post(self, *args, **kwargs):  # pragma: no cover  # noqa: ANN002, ANN003, ANN201
+    def post(  # pragma: nocover
+        self,
+        application: str,
+        event: str | None = None,
+        description: str | None = None,
+        priority: int = 0,
+        providerkey: str | None = None,
+        url: str | None = None,
+    ) -> dict[str, str] | Coroutine[Any, Any, dict[str, str]]:
         """
         Push a notification to the Prowl API.
 
@@ -175,7 +189,10 @@ class ProwlpyCore:
         """
         raise NotImplementedError("This method should be implemented in subclasses.")
 
-    def verify_key(self, *args, **kwargs):  # pragma: no cover  # noqa: ANN002, ANN003, ANN201
+    def verify_key(  # pragma: nocover
+        self,
+        providerkey: str | None = None,
+    ) -> dict[str, str] | Coroutine[Any, Any, dict[str, str]]:
         """
         Verify if the API key is valid.
 
@@ -183,7 +200,10 @@ class ProwlpyCore:
         """
         raise NotImplementedError("This method should be implemented in subclasses.")
 
-    def retrieve_token(self, *args, **kwargs):  # pragma: no cover  # noqa: ANN002, ANN003, ANN201
+    def retrieve_token(  # pragma: nocover
+        self,
+        providerkey: str | None = None,
+    ) -> dict[str, str] | Coroutine[Any, Any, dict[str, str]]:
         """
         Retrieve a registration token to generate API key.
 
@@ -191,7 +211,11 @@ class ProwlpyCore:
         """
         raise NotImplementedError("This method should be implemented in subclasses.")
 
-    def retrieve_apikey(self, *args, **kwargs):  # pragma: no cover  # noqa: ANN002, ANN003, ANN201
+    def retrieve_apikey(  # pragma: nocover
+        self,
+        token: str,
+        providerkey: str | None = None,
+    ) -> dict[str, str] | Coroutine[Any, Any, dict[str, str]]:
         """
         Generate an API key from a registration token.
 
@@ -215,6 +239,9 @@ class Prowl(ProwlpyCore):
         retrieve_apikey: Generate an API key from registration token.
     """
 
+    send: Callable[..., dict[str, str]]
+    add: Callable[..., dict[str, str]]
+
     def __init__(
         self,
         apikey: str | list[str] | None = None,
@@ -231,7 +258,7 @@ class Prowl(ProwlpyCore):
         """
         self.add = self.send = self.post
         super().__init__(apikey=apikey, providerkey=providerkey)
-        self.client = client or httpx.Client(http2=True)
+        self.client: httpx.Client = client or httpx.Client(http2=True)
 
     def __enter__(self) -> "Prowl":
         """
@@ -328,7 +355,12 @@ class Prowl(ProwlpyCore):
 
         response: httpx.Response = self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
 
-        return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
+        parsed: dict[str, str] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]["success"]
+        return parsed
 
     def verify_key(self, providerkey: str | None = None) -> dict[str, str]:
         """
@@ -344,7 +376,12 @@ class Prowl(ProwlpyCore):
 
         response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
 
-        return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
+        parsed: dict[str, str] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]["success"]
+        return parsed
 
     def retrieve_token(self, providerkey: str | None = None) -> dict[str, str]:
         """
@@ -364,7 +401,11 @@ class Prowl(ProwlpyCore):
 
         response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/retrieve/token", data=data)
 
-        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        parsed: dict[str, dict[str, str]] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]
         return parsed["retrieve"] | parsed["success"]
 
     def retrieve_apikey(self, token: str, providerkey: str | None = None) -> dict[str, str]:
@@ -385,7 +426,11 @@ class Prowl(ProwlpyCore):
 
         response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}retrieve/apikey", data=data)
 
-        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        parsed: dict[str, dict[str, str]] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]
         return parsed["retrieve"] | parsed["success"]
 
 
@@ -404,6 +449,9 @@ class AsyncProwl(ProwlpyCore):
         retrieve_apikey: Generate an API key from registration token.
     """
 
+    send: Callable[..., Coroutine[Any, Any, dict[str, str]]]
+    add: Callable[..., Coroutine[Any, Any, dict[str, str]]]
+
     def __init__(
         self,
         apikey: str | list[str] | None = None,
@@ -420,7 +468,7 @@ class AsyncProwl(ProwlpyCore):
         """
         self.add = self.send = self.post
         super().__init__(apikey=apikey, providerkey=providerkey)
-        self.client = client or httpx.AsyncClient(http2=True)
+        self.client: httpx.AsyncClient = client or httpx.AsyncClient(http2=True)
 
     async def __aenter__(self) -> "AsyncProwl":
         """
@@ -512,7 +560,12 @@ class AsyncProwl(ProwlpyCore):
 
         response: httpx.Response = await self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
 
-        return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
+        parsed: dict[str, str] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]["success"]
+        return parsed
 
     async def verify_key(self, providerkey: str | None = None) -> dict[str, str]:
         """
@@ -528,7 +581,12 @@ class AsyncProwl(ProwlpyCore):
 
         response: httpx.Response = await self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
 
-        return xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]["success"]
+        parsed: dict[str, str] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]["success"]
+        return parsed
 
     async def retrieve_token(self, providerkey: str | None = None) -> dict[str, str]:
         """
@@ -552,7 +610,11 @@ class AsyncProwl(ProwlpyCore):
             data=data,
         )
 
-        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        parsed: dict[str, dict[str, str]] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]
         return parsed["retrieve"] | parsed["success"]
 
     async def retrieve_apikey(self, token: str, providerkey: str | None = None) -> dict[str, str]:
@@ -577,5 +639,9 @@ class AsyncProwl(ProwlpyCore):
             data=data,
         )
 
-        parsed: dict[str, dict] = xmltodict.parse(xml_input=response.text, attr_prefix="", cdata_key="text")["prowl"]
+        parsed: dict[str, dict[str, str]] = xmltodict.parse(
+            xml_input=response.text,
+            attr_prefix="",
+            cdata_key="text",
+        )["prowl"]
         return parsed["retrieve"] | parsed["success"]

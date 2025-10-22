@@ -1,5 +1,14 @@
 # Prowlpy changelog
 
+## 1.1.3
+
+Finish typing coverage.
+
+## 1.1.2
+
+Fix typing marker.
+Update dependencies, add missing tests.
+
 ## 1.1.1
 
 Add ability to pass through an already initialized httpx client.
