@@ -269,10 +269,6 @@ class Prowl(ProwlpyCore):
         """
         return self
 
-    def __del__(self) -> None:
-        """Context manager del."""
-        self.close()
-
     def __exit__(
         self,
         exc_type: type[BaseException] | None,

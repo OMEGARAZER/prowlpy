@@ -30,10 +30,15 @@ jobs:
     - name: Test with pytest on ${{ matrix.python-version }}
       run: |
         uv sync --frozen --all-groups
-        uv run --frozen pytest --verbose --cov=./prowlpy/ --cov-report html
+        uv run --frozen pytest --verbose --cov=./prowlpy/ --cov-branch --cov-report html --cov-report xml
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload coverage report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: coverage_report-${{ matrix.os }}-${{ matrix.python-version }}
         path: htmlcov/

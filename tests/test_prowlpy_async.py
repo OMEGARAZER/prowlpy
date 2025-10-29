@@ -68,6 +68,13 @@ async def test_async_context_manager_with_error() -> None:
 
 
 @pytest.mark.asyncio
+async def test_async_context_manager_bad_client_aclose() -> None:
+    """Test context manager aclose does not raise exception with a bad client."""
+    async with AsyncProwl(apikey=VALID_API_KEY) as prowl:
+        del prowl.client
+
+
+@pytest.mark.asyncio
 async def test_async_post_notification_success(mock_api: respx.Router) -> None:
     """Test successful notification post."""
     mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
@@ -346,6 +353,20 @@ async def test_async_post_not_approved_error(mock_api: respx.Router) -> None:
 async def test_async_post_server_error(mock_api: respx.Router) -> None:
     """Test post with server error."""
     mock_api.post(url="/add").mock(return_value=Response(status_code=500, text="Internal Server Error"))
+
+    prowl = AsyncProwl(apikey=VALID_API_KEY)
+    with pytest.raises(expected_exception=APIError, match="Internal server error - Internal Server Error"):
+        await prowl.post(
+            application="Test App",
+            event="Test Event",
+            description="Test Description",
+        )
+
+
+@pytest.mark.asyncio
+async def test_async_post_server_error_no_reason(mock_api: respx.Router) -> None:
+    """Test post with server error."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=500))
 
     prowl = AsyncProwl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Internal server error"):

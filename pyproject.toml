@@ -52,11 +52,11 @@ cli = [
 ]
 lint = [
     "refurb>=2.2.0",
-    "ruff>=0.14.1",
+    "ruff>=0.14.2",
 ]
 type = [
     "mypy>=1.18.2",
-    "pyright>=1.1.406",
+    "pyright>=1.1.407",
     "types-xmltodict>=1.0.1.20250920",
 ]
 test = [

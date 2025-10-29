@@ -4,7 +4,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/prowlpy.svg?logo=PyPI)](https://pypi.python.org/pypi/prowlpy)
 [![Python Test](https://github.com/OMEGARAZER/prowlpy/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/OMEGARAZER/prowlpy/actions/workflows/test.yml)
 [![linting: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&label=linting)](https://github.com/astral-sh/ruff)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?logo=Python)](https://github.com/astral-sh/ruff)
+[![codecov](https://codecov.io/github/OMEGARAZER/prowlpy/graph/badge.svg?token=PFGVDXX7TJ)](https://codecov.io/github/OMEGARAZER/prowlpy)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 Python library to interface with the [Prowl](https://www.prowlapp.com/) API.

@@ -64,6 +64,12 @@ def test_context_manager_with_error() -> None:
         raise ValueError("Test error")
 
 
+def test_context_manager_bad_client_close() -> None:
+    """Test context manager close does not raise exception with a bad client."""
+    with Prowl(apikey=VALID_API_KEY) as prowl:
+        del prowl.client
+
+
 def test_post_notification_success(mock_api: respx.Router) -> None:
     """Test successful notification post."""
     mock_api.post(url="/add").mock(return_value=Response(status_code=200, text=SUCCESS_RESPONSE))
@@ -315,6 +321,19 @@ def test_post_not_approved_error(mock_api: respx.Router) -> None:
 def test_post_server_error(mock_api: respx.Router) -> None:
     """Test post with server error."""
     mock_api.post(url="/add").mock(return_value=Response(status_code=500, text="Internal Server Error"))
+
+    prowl = Prowl(apikey=VALID_API_KEY)
+    with pytest.raises(expected_exception=APIError, match="Internal server error - Internal Server Error"):
+        prowl.post(
+            application="Test App",
+            event="Test Event",
+            description="Test Description",
+        )
+
+
+def test_post_server_error_no_reason(mock_api: respx.Router) -> None:
+    """Test post with server error."""
+    mock_api.post(url="/add").mock(return_value=Response(status_code=500))
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Internal server error"):
