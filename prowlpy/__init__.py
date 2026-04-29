@@ -20,21 +20,6 @@ from .prowlpy import (
     RateLimitExceededError,
 )
 
-try:
-    from ._cli import main
-except ImportError:
-
-    def main() -> None:  # type: ignore[misc]
-        """Fallback main if cli components not installed."""
-        import sys  # noqa: PLC0415
-
-        print(  # noqa: T201
-            "The Prowlpy command line client could not be run because the required dependencies were not installed.\n"
-            "Make sure it is installed with pip install prowlpy[cli]",
-        )
-        sys.exit(1)
-
-
 __all__: list[str] = [
     "APIError",
     "AsyncProwl",
@@ -44,5 +29,4 @@ __all__: list[str] = [
     "NotApprovedError",
     "Prowl",
     "RateLimitExceededError",
-    "main",
 ]

@@ -1,36 +1,37 @@
 name: Python Linting
 
 on:
-  push:
-    paths:
-      - "*.py"
-  pull_request:
-    paths:
-      - "*.py"
+    push:
+        paths:
+            - "*.py"
+    pull_request:
+        paths:
+            - "*.py"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref_name }}-${{
+        github.event.pull_request.number || github.sha }}
+    cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v5
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v7
-      with:
-        version: "latest"
-        version-file : "pyproject.toml"
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v8.1.0
+              with:
+                  version: "latest"
+                  version-file: "pyproject.toml"
 
-    - name: Ruff formatting check
-      run: |
-        uv tool run ruff format --check prowlpy/
+            - name: Ruff formatting check
+              run: |
+                  uv tool run ruff format --check prowlpy/
 
-    - name: Ruff lint
-      run: |
-        uv tool run ruff check --output-format=github prowlpy/
+            - name: Ruff lint
+              run: |
+                  uv tool run ruff check --output-format=github prowlpy/
 
-    - name: Refurb lint
-      run: |
-        uv tool run refurb --format github prowlpy/
+            - name: Refurb lint
+              run: |
+                  uv tool run refurb --format github prowlpy/

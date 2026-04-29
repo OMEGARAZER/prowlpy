@@ -1,5 +1,6 @@
 """Tests for the Prowlpy CLI module."""
 
+import importlib
 import sys
 
 import pytest
@@ -151,3 +152,14 @@ def test_multiple_apikeys(mock_prowl_api):  # noqa: ANN001
     assert result.exit_code == 0
     assert "Message sent" in result.output
     assert mock_prowl_api.calls.last.request.url.params["apikey"] == "key1,key2"
+
+
+def test_missing_cli_components(monkeypatch, capsys):  # noqa: ANN001
+    """Test with missing CLI components."""
+    monkeypatch.setitem(sys.modules, "click", None)
+    monkeypatch.setitem(sys.modules, "loguru", None)
+    monkeypatch.delitem(sys.modules, "prowlpy._cli", raising=False)
+    with pytest.raises(expected_exception=SystemExit) as exc_info:
+        importlib.import_module(name="prowlpy._cli")
+    assert exc_info.value.code == 1
+    assert "install prowlpy[cli]" in capsys.readouterr().out

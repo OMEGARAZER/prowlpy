@@ -16,7 +16,7 @@ from typing import Any, NoReturn
 import httpx
 import xmltodict
 
-__version__: str = "1.1.3"
+__version__: str = "1.1.4"
 
 
 class APIError(Exception):
@@ -513,7 +513,7 @@ class AsyncProwl(ProwlpyCore):
         try:
             response: httpx.Response = await request_client(url=url, params=data, headers=self.headers)
             if not response.is_success:
-                self._api_error_handler(response.status_code, response.text)
+                self._api_error_handler(error_code=response.status_code, reason=response.text)
         except httpx.RequestError as error:
             raise APIError(f"API connection error: {error}") from error
         else:

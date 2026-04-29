@@ -1,29 +1,30 @@
 name: Upload Python Package
 
 on:
-  release:
-    types: [created]
+    release:
+        types: [ created ]
 
 jobs:
-  publish-build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
-    steps:
-    - uses: actions/checkout@v5
-    - name: Install uv
-      uses: astral-sh/setup-uv@v7
-      with:
-        version: "latest"
+    publish-build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            id-token: write
+        steps:
+            - uses: actions/checkout@v6
+            - name: Install uv
+              uses: astral-sh/setup-uv@v8.1.0
+              with:
+                  version: "latest"
 
-    - name: Build
-      run: uv build --no-sources
+            - name: Build
+              run: uv build --no-sources
 
-    - name: Publish to Pypi
-      run: uv publish
+            - name: Publish to Pypi
+              run: uv publish
 
-    - name: Add build to release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: gh release upload "${{ github.event.release.tag_name }}" dist/*.whl dist/*.tar.gz
+            - name: Add build to release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh release upload "${{ github.event.release.tag_name }}" dist/*.whl
+                  dist/*.tar.gz

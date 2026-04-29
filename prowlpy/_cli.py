@@ -2,9 +2,16 @@
 
 import sys
 
-import click
-from httpx import Client
-from loguru import logger
+try:
+    import click
+    from httpx import Client
+    from loguru import logger
+except ImportError:
+    print(  # noqa: T201
+        "The Prowlpy command line client could not be run because the required dependencies were not installed.\n"
+        "Make sure it is installed with pip install prowlpy[cli]",
+    )
+    sys.exit(1)
 
 from .prowlpy import APIError, MissingKeyError, Prowl, __version__
 
