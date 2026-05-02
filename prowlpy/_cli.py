@@ -1,15 +1,17 @@
 """Prowlpy CLI module."""
 
 import sys
+from typing import Annotated
 
 try:
-    import click
-    from httpx import Client
+    import typer
     from loguru import logger
+    from pyreqwest.client import SyncClientBuilder
+    from pyreqwest.exceptions import RequestTimeoutError
 except ImportError:
     print(  # noqa: T201
         "The Prowlpy command line client could not be run because the required dependencies were not installed.\n"
-        "Make sure it is installed with pip install prowlpy[cli]",
+        "Make sure it is installed with pip install prowlpy[cli] if you used pip to install.",
     )
     sys.exit(1)
 
@@ -18,23 +20,29 @@ from .prowlpy import APIError, MissingKeyError, Prowl, __version__
 logger.configure(handlers=[{"sink": sys.stdout, "format": "{message}", "level": "INFO"}])
 
 
-def _check_version(context: click.Context, _param: click.Parameter, value: bool) -> None:
+def _check_version(context: typer.Context, value: bool) -> None:
     if not value or context.resilient_parsing:
         return
     try:
-        with Client(base_url="https://pypi.org/pypi", http2=True) as client:
-            latest: str = client.get(url="/prowlpy/json").json()["info"]["version"]
+        with (
+            SyncClientBuilder()
+            .error_for_status(enable=True)
+            .base_url(url="https://pypi.org/")
+            .http2(enable=True)
+            .build() as client
+        ):
+            latest: str = client.get(url="pypi/prowlpy/json").build().send().json()["info"]["version"]
             logger.info("You are currently using v{} the latest is v{}", __version__, latest)
-    except TimeoutError:
+    except RequestTimeoutError:
         logger.info("Timeout reached fetching current version from Pypi - Prowlpy v{}", __version__)
-    context.exit()
+    raise typer.Exit(code=0)
 
 
-def _help(context: click.Context, _param: click.Parameter, value: bool) -> None:
+def _help(context: typer.Context, value: bool) -> None:
     if not value or context.resilient_parsing:
         return
     print_help()
-    context.exit()
+    raise typer.Exit(code=0)
 
 
 def print_help() -> None:
@@ -64,28 +72,30 @@ def print_help() -> None:
     hlogger.info("  --help, -h\t\t\t\tDisplays this help message. You are here.")
 
 
-@click.command(add_help_option=False)
-@click.option("apikey", "--apikey", "-k", type=str, multiple=True)
-@click.option("application", "--application", "-a", type=str, default=None)
-@click.option("event", "--event", "-e", type=str, default=None)
-@click.option("description", "--description", "-d", type=str, default=None)
-@click.option("priority", "--priority", "-p", type=click.IntRange(min=-2, max=2, clamp=True), default=0)
-@click.option("url", "--url", "-u", type=str, default=None)
-@click.option("version", "--version", "-v", is_flag=True, is_eager=True, expose_value=False, callback=_check_version)
-@click.option("help", "--help", "-h", is_flag=True, is_eager=True, expose_value=False, callback=_help)
-@click.pass_context
+app = typer.Typer()
+
+
+@app.command(add_help_option=False)
 def main(
-    context: click.Context,
-    apikey: str,
-    application: str,
-    event: str,
-    description: str,
-    priority: int,
-    url: str,
+    apikey: Annotated[list[str] | None, typer.Option("--apikey", "-k")] = None,
+    application: Annotated[str, typer.Option("--application", "-a")] = "",
+    event: Annotated[str | None, typer.Option("--event", "-e")] = None,
+    description: Annotated[str | None, typer.Option("--description", "-d")] = None,
+    priority: Annotated[int, typer.Option("--priority", "-p", min=-2, max=2, clamp=True)] = 0,
+    url: Annotated[str | None, typer.Option("--url", "-u")] = None,
+    *,
+    _version: Annotated[
+        bool,
+        typer.Option("--version", "-v", callback=_check_version, is_eager=True, expose_value=False),
+    ] = False,
+    _custom_help: Annotated[
+        bool,
+        typer.Option("--help", "-h", callback=_help, is_eager=True, expose_value=False),
+    ] = False,
 ) -> None:
     if len(sys.argv) == 1:
         print_help()
-        context.exit(code=1)
+        raise typer.Exit(code=1)
     try:
         with Prowl(apikey=apikey) as prowl:
             response: dict[str, str] = prowl.post(
@@ -98,4 +108,4 @@ def main(
             logger.info("Message sent, rate limit remaining {}", response["remaining"])
     except (APIError, MissingKeyError, ValueError) as e:
         logger.info(e)
-        sys.exit(1)
+        raise typer.Exit(code=1) from e

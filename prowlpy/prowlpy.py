@@ -13,10 +13,12 @@ import types
 from collections.abc import Callable, Coroutine
 from typing import Any, NoReturn
 
-import httpx
 import xmltodict
+from pyreqwest.client import Client, ClientBuilder, SyncClient, SyncClientBuilder
+from pyreqwest.exceptions import RequestError
+from pyreqwest.response import Response, SyncResponse
 
-__version__: str = "1.1.5"
+__version__: str = "2.0.0"
 
 
 class APIError(Exception):
@@ -63,12 +65,10 @@ class ProwlpyCore:
         else:
             self.apikey = apikey
         self.providerkey: str | None = providerkey
-        self.headers: httpx.Headers = httpx.Headers(
-            headers={
-                "User-Agent": f"Prowlpy/{__version__}",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        )
+        self.headers: dict[str, str] = {
+            "User-Agent": f"Prowlpy/{__version__}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
         self.baseurl = "https://api.prowlapp.com/publicapi"
 
     def _api_error_handler(self, error_code: int, reason: str = "") -> NoReturn:
@@ -165,7 +165,7 @@ class ProwlpyCore:
         method: str,
         url: str,
         data: dict[str, str | int],
-    ) -> httpx.Response | Coroutine[Any, Any, httpx.Response]:
+    ) -> SyncResponse | Coroutine[Any, Any, Response]:
         """
         Make request to Prowl API.
 
@@ -258,7 +258,7 @@ class Prowl(ProwlpyCore):
         """
         self.add = self.send = self.post
         super().__init__(apikey=apikey, providerkey=providerkey)
-        self.client: httpx.Client = client or httpx.Client(http2=True)
+        self.client: SyncClient = client or SyncClientBuilder().http2(enable=True).build()
 
     def __enter__(self) -> "Prowl":
         """
@@ -285,7 +285,7 @@ class Prowl(ProwlpyCore):
         if hasattr(self, "client"):
             self.client.close()
 
-    def _make_request(self, method: str, url: str, data: dict[str, str | int]) -> httpx.Response:
+    def _make_request(self, method: str, url: str, data: dict[str, str | int]) -> SyncResponse:
         """
         Make request to Prowl API.
 
@@ -295,7 +295,7 @@ class Prowl(ProwlpyCore):
             data (dict): processed data params to send to the Prowl API.
 
         Returns:
-            httpx.Response
+            SyncResponse
 
         Raises:
             APIError: If unable to connect to the API.
@@ -305,10 +305,12 @@ class Prowl(ProwlpyCore):
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
         request_client = getattr(self.client, method.lower())
         try:
-            response: httpx.Response = request_client(url=url, params=data, headers=self.headers)
-            if not response.is_success:
-                self._api_error_handler(response.status_code, response.text)
-        except httpx.RequestError as error:
+            response: SyncResponse = (
+                request_client(url=url).headers(headers=self.headers).query(query=data).build().send()
+            )
+            if not (200 <= response.status < 300):
+                self._api_error_handler(error_code=response.status, reason=response.text())
+        except RequestError as error:
             raise APIError(f"API connection error: {error}") from error
         else:
             return response
@@ -349,10 +351,10 @@ class Prowl(ProwlpyCore):
             url=url,
         )
 
-        response: httpx.Response = self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
+        response: SyncResponse = self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
 
         parsed: dict[str, str] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]["success"]
@@ -370,10 +372,10 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="verify", providerkey=providerkey)
 
-        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
+        response: SyncResponse = self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
 
         parsed: dict[str, str] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]["success"]
@@ -395,10 +397,10 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="token", providerkey=providerkey)
 
-        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/retrieve/token", data=data)
+        response: SyncResponse = self._make_request(method="get", url=f"{self.baseurl}/retrieve/token", data=data)
 
         parsed: dict[str, dict[str, str]] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]
@@ -420,10 +422,10 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="key", providerkey=providerkey, token=token)
 
-        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/retrieve/apikey", data=data)
+        response: SyncResponse = self._make_request(method="get", url=f"{self.baseurl}/retrieve/apikey", data=data)
 
         parsed: dict[str, dict[str, str]] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]
@@ -464,7 +466,7 @@ class AsyncProwl(ProwlpyCore):
         """
         self.add = self.send = self.post
         super().__init__(apikey=apikey, providerkey=providerkey)
-        self.client: httpx.AsyncClient = client or httpx.AsyncClient(http2=True)
+        self.client: Client = client or ClientBuilder().http2(enable=True).build()
 
     async def __aenter__(self) -> "AsyncProwl":
         """
@@ -489,9 +491,9 @@ class AsyncProwl(ProwlpyCore):
     async def aclose(self) -> None:
         """Asyncronous context manager close."""
         if hasattr(self, "client"):
-            await self.client.aclose()
+            await self.client.close()
 
-    async def _make_request(self, method: str, url: str, data: dict[str, str | int]) -> httpx.Response:
+    async def _make_request(self, method: str, url: str, data: dict[str, str | int]) -> Response:
         """
         Make request to Prowl API.
 
@@ -501,7 +503,7 @@ class AsyncProwl(ProwlpyCore):
             data (dict): processed data params to send to the Prowl API.
 
         Returns:
-            httpx.Response
+            Response
 
         Raises:
             APIError: If unable to connect to the API.
@@ -511,10 +513,12 @@ class AsyncProwl(ProwlpyCore):
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
         request_client = getattr(self.client, method.lower())
         try:
-            response: httpx.Response = await request_client(url=url, params=data, headers=self.headers)
-            if not response.is_success:
-                self._api_error_handler(error_code=response.status_code, reason=response.text)
-        except httpx.RequestError as error:
+            response: Response = (
+                await request_client(url=url).headers(headers=self.headers).query(query=data).build().send()
+            )
+            if not (200 <= response.status < 300):
+                self._api_error_handler(error_code=response.status, reason=await response.text())
+        except RequestError as error:
             raise APIError(f"API connection error: {error}") from error
         else:
             return response
@@ -554,10 +558,10 @@ class AsyncProwl(ProwlpyCore):
             url=url,
         )
 
-        response: httpx.Response = await self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
+        response: Response = await self._make_request(method="post", url=f"{self.baseurl}/add", data=data)
 
         parsed: dict[str, str] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=await response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]["success"]
@@ -575,10 +579,10 @@ class AsyncProwl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="verify", providerkey=providerkey)
 
-        response: httpx.Response = await self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
+        response: Response = await self._make_request(method="get", url=f"{self.baseurl}/verify", data=data)
 
         parsed: dict[str, str] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=await response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]["success"]
@@ -600,14 +604,14 @@ class AsyncProwl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="token", providerkey=providerkey)
 
-        response: httpx.Response = await self._make_request(
+        response: Response = await self._make_request(
             method="get",
             url=f"{self.baseurl}/retrieve/token",
             data=data,
         )
 
         parsed: dict[str, dict[str, str]] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=await response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]
@@ -629,14 +633,14 @@ class AsyncProwl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="key", providerkey=providerkey, token=token)
 
-        response: httpx.Response = await self._make_request(
+        response: Response = await self._make_request(
             method="get",
             url=f"{self.baseurl}/retrieve/apikey",
             data=data,
         )
 
         parsed: dict[str, dict[str, str]] = xmltodict.parse(
-            xml_input=response.text,
+            xml_input=await response.text(),
             attr_prefix="",
             cdata_key="text",
         )["prowl"]
