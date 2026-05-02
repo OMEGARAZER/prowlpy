@@ -16,7 +16,7 @@ from typing import Any, NoReturn
 import httpx
 import xmltodict
 
-__version__: str = "1.1.4"
+__version__: str = "1.1.5"
 
 
 class APIError(Exception):
@@ -420,7 +420,7 @@ class Prowl(ProwlpyCore):
         """
         data: dict[str, str | int] = self._prepare_data(route="key", providerkey=providerkey, token=token)
 
-        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}retrieve/apikey", data=data)
+        response: httpx.Response = self._make_request(method="get", url=f"{self.baseurl}/retrieve/apikey", data=data)
 
         parsed: dict[str, dict[str, str]] = xmltodict.parse(
             xml_input=response.text,
@@ -631,7 +631,7 @@ class AsyncProwl(ProwlpyCore):
 
         response: httpx.Response = await self._make_request(
             method="get",
-            url=f"{self.baseurl}retrieve/apikey",
+            url=f"{self.baseurl}/retrieve/apikey",
             data=data,
         )
 

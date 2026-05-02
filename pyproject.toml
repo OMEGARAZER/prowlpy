@@ -61,7 +61,7 @@ type = [
     "mypy>=1.20.2",
     "pyright>=1.1.409",
     "types-xmltodict>=1.0.1.20260408",
-    "ty>=0.0.33",
+    "ty>=0.0.34",
 ]
 test = [
     "pytest>=9.0.3",
