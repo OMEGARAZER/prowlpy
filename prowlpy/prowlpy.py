@@ -11,14 +11,14 @@ Typical usage:
 
 import types
 from collections.abc import Callable, Coroutine
-from typing import Any, NoReturn
+from typing import Any, NoReturn, Self
 
 import xmltodict
 from pyreqwest.client import Client, ClientBuilder, SyncClient, SyncClientBuilder
 from pyreqwest.exceptions import RequestError
 from pyreqwest.response import Response, SyncResponse
 
-__version__: str = "2.0.0"
+__version__: str = "2.0.1"
 
 
 class APIError(Exception):
@@ -260,7 +260,7 @@ class Prowl(ProwlpyCore):
         super().__init__(apikey=apikey, providerkey=providerkey)
         self.client: SyncClient = client or SyncClientBuilder().http2(enable=True).build()
 
-    def __enter__(self) -> "Prowl":
+    def __enter__(self) -> Self:
         """
         Context manager entry.
 
@@ -303,10 +303,14 @@ class Prowl(ProwlpyCore):
         """
         if method.lower() not in {"post", "get"}:
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
-        request_client = getattr(self.client, method.lower())
         try:
             response: SyncResponse = (
-                request_client(url=url).headers(headers=self.headers).query(query=data).build().send()
+                self.client
+                .request(method=method.upper(), url=url)
+                .headers(headers=self.headers)
+                .query(query=data)
+                .build()
+                .send()
             )
             if not (200 <= response.status < 300):
                 self._api_error_handler(error_code=response.status, reason=response.text())
@@ -468,7 +472,7 @@ class AsyncProwl(ProwlpyCore):
         super().__init__(apikey=apikey, providerkey=providerkey)
         self.client: Client = client or ClientBuilder().http2(enable=True).build()
 
-    async def __aenter__(self) -> "AsyncProwl":
+    async def __aenter__(self) -> Self:
         """
         Asyncronous context manager entry.
 
@@ -511,10 +515,14 @@ class AsyncProwl(ProwlpyCore):
         """
         if method.lower() not in {"post", "get"}:
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
-        request_client = getattr(self.client, method.lower())
         try:
             response: Response = (
-                await request_client(url=url).headers(headers=self.headers).query(query=data).build().send()
+                await self.client
+                .request(method=method.upper(), url=url)
+                .headers(headers=self.headers)
+                .query(query=data)
+                .build()
+                .send()
             )
             if not (200 <= response.status < 300):
                 self._api_error_handler(error_code=response.status, reason=await response.text())

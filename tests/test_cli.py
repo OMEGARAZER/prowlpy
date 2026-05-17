@@ -142,6 +142,22 @@ def test_pypi_timeout(client_mocker: ClientMocker) -> None:
     assert "Timeout reached fetching current version" in result.output
 
 
+def test_pypi_server_error(client_mocker: ClientMocker) -> None:
+    """Test status error in version check."""
+    client_mocker.get(path="/pypi/prowlpy/json").with_status(status=500).with_body_text(body="Internal Server Error")
+    result = CliRunner().invoke(app=app, args=["--version"])
+    assert result.exit_code == 0
+    assert "Unable to fetch latest version" in result.output
+
+
+def test_pypi_invalid_json(client_mocker: ClientMocker) -> None:
+    """Test invalid JSON returned by Pypi."""
+    client_mocker.get(path="/pypi/prowlpy/json").with_status(status=200).with_body_text(body="No JSON here")
+    result = CliRunner().invoke(app=app, args=["--version"])
+    assert result.exit_code == 0
+    assert "Unable to fetch latest version" in result.output
+
+
 def test_multiple_apikeys(mock_prowl_api: ClientMocker) -> None:
     """Test with multiple API keys set."""
     result = CliRunner().invoke(

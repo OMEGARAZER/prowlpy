@@ -1,13 +1,13 @@
 """Prowlpy CLI module."""
 
 import sys
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 try:
     import typer
     from loguru import logger
     from pyreqwest.client import SyncClientBuilder
-    from pyreqwest.exceptions import RequestTimeoutError
+    from pyreqwest.exceptions import JSONDecodeError, RequestTimeoutError, StatusError
 except ImportError:
     print(  # noqa: T201
         "The Prowlpy command line client could not be run because the required dependencies were not installed.\n"
@@ -16,6 +16,9 @@ except ImportError:
     sys.exit(1)
 
 from .prowlpy import APIError, MissingKeyError, Prowl, __version__
+
+if TYPE_CHECKING:
+    from pyreqwest.response import SyncResponse
 
 logger.configure(handlers=[{"sink": sys.stdout, "format": "{message}", "level": "INFO"}])
 
@@ -31,10 +34,15 @@ def _check_version(context: typer.Context, value: bool) -> None:
             .http2(enable=True)
             .build() as client
         ):
-            latest: str = client.get(url="pypi/prowlpy/json").build().send().json()["info"]["version"]
+            response: SyncResponse = client.get(url="pypi/prowlpy/json").build().send()
+            latest: str = response.json()["info"]["version"]
             logger.info("You are currently using v{} the latest is v{}", __version__, latest)
+    except (JSONDecodeError, KeyError, StatusError):
+        logger.info("Unable to fetch latest version from Pypi - Prowlpy v{}.", __version__)
+        raise typer.Exit(code=0) from None
     except RequestTimeoutError:
-        logger.info("Timeout reached fetching current version from Pypi - Prowlpy v{}", __version__)
+        logger.info("Timeout reached fetching current version from Pypi - Prowlpy v{}.", __version__)
+        raise typer.Exit(code=0) from None
     raise typer.Exit(code=0)
 
 
