@@ -47,7 +47,7 @@ prowlpy = "prowlpy._cli:app"
 [dependency-groups]
 dev = [
     "loguru>=0.7.3",
-    "prek>=0.4.0",
+    "prek>=0.4.1",
     "pyreqwest>=0.12.0",
     "typer>=0.25.1",
     "xmltodict>=1.0.4",
@@ -57,14 +57,14 @@ dev = [
 ]
 lint = [
     "refurb>=2.3.1",
-    "ruff>=0.15.13",
+    "ruff>=0.15.14",
 ]
 type = [
     "mypy>=2.1.0",
     "pyrefly>=1.0.0",
     "pyright>=1.1.409",
     "types-xmltodict>=1.0.1.20260408",
-    "ty>=0.0.37",
+    "ty>=0.0.38",
 ]
 test = [
     "pytest>=9.0.3",

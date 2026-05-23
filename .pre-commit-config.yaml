@@ -18,11 +18,11 @@ repos:
             name: refurb
 
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.15.13
+      rev: v0.15.14
       hooks:
           - id: ruff
             name: ruff lint
-            args: [ "--fixable=I", "--fix" ]
+            args: ["--fixable=I", "--fix"]
           - id: ruff-format
             name: ruff format
 
@@ -50,8 +50,9 @@ repos:
                 - ruff>=0.15.12
 
     - repo: https://github.com/astral-sh/uv-pre-commit
-      rev: 0.11.14
+      rev: 0.11.16
       hooks:
           - id: uv-lock
           - id: uv-export
-            args: [ "--frozen", "--output-file=pylock.toml", "--quiet" ]
+            args: ["--frozen", "--output-file=pylock.toml", "--quiet"]
+          - id: uv-audit

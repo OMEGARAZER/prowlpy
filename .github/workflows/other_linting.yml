@@ -21,9 +21,7 @@ jobs:
                   node-version: 22
 
             - name: Install dependencies
-              run: |
-                  npm install -g markdownlint-cli
+              run: npm install -g markdownlint-cli
 
             - name: Markdownlint
-              run: |
-                  markdownlint '**/*.md'
+              run: markdownlint '**/*.md'

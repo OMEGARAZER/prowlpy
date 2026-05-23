@@ -9,8 +9,7 @@ on:
             - "*.py"
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref_name }}-${{
-        github.event.pull_request.number || github.sha }}
+    group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
     cancel-in-progress: true
 
 jobs:
@@ -25,13 +24,10 @@ jobs:
                   version-file: "pyproject.toml"
 
             - name: Ruff formatting check
-              run: |
-                  uv tool run ruff format --check prowlpy/
+              run: uv tool run ruff format --check prowlpy/
 
             - name: Ruff lint
-              run: |
-                  uv tool run ruff check --output-format=github prowlpy/
+              run: uv tool run ruff check --output-format=github prowlpy/
 
             - name: Refurb lint
-              run: |
-                  uv tool run refurb --format github prowlpy/
+              run: uv tool run refurb --format github prowlpy/

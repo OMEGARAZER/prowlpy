@@ -1,5 +1,11 @@
 # Prowlpy changelog
 
+## 2.0.1
+
+Simplify setting request method.
+Better error handling for version check.
+Update some typings. Add Pyrefly config.
+
 ## 2.0.0
 
 Migrate from HTTPX backend to [pyreqwest](https://github.com/MarkusSintonen/pyreqwest).
