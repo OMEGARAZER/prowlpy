@@ -27,7 +27,7 @@ jobs:
                   subject-path: dist/*
 
             - name: Publish to Pypi
-              run: uv publish --attestation
+              run: uv publish
 
             - name: Add build to release
               env:
