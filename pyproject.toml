@@ -25,7 +25,7 @@ dependencies = [
     "pyreqwest>=0.12.0",
     "xmltodict>=0.13.0",  # Ubuntu 24.04 packaged version
 ]
-version = "2.0.2"
+version = "2.0.3"
 
 [tool.uv.build-backend]
 module-root = ""
