@@ -1,5 +1,19 @@
 # Prowlpy changelog
 
+## 1.1.6
+
+Update to new XML API endpoints.
+Update dependencies.
+Minor backports.
+
+## 1.1.5
+
+Fix typo in API key retrieval route.
+
+## 1.1.4
+
+Remove cli import from init to speed up importing solely as a library.
+
 ## 1.1.3
 
 Finish typing coverage.

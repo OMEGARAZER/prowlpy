@@ -61,7 +61,7 @@ async def test_async_context_manager() -> None:
 @pytest.mark.asyncio
 async def test_async_context_manager_with_error() -> None:
     """Test context manager handles exceptions properly."""
-    with pytest.raises(expected_exception=ValueError, match="Test error"):  # noqa: PT012
+    with pytest.raises(expected_exception=ValueError, match="Test error"):  # ruff: ignore[pytest-raises-with-multiple-statements]
         async with AsyncProwl(apikey=VALID_API_KEY) as prowl:
             assert isinstance(prowl, AsyncProwl)
             raise ValueError("Test error")
@@ -396,7 +396,7 @@ async def test_async_make_request_invalid_method() -> None:
     """Test if invalid method passed to _make_request."""
     prowl = AsyncProwl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=ValueError, match="Invalid method type"):
-        await prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # noqa: SLF001
+        await prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # ruff: ignore[private-member-access]
 
 
 @pytest.mark.asyncio

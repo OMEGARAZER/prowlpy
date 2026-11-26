@@ -9,14 +9,14 @@ from click.testing import CliRunner
 from httpx import Response
 from loguru import logger
 
-from prowlpy._cli import __version__, main  # noqa: PLC2701
+from prowlpy._cli import __version__, main  # ruff: ignore[import-private-name]
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse]
 def mock_logger():
     """Mock Loguru logger."""
     logger.remove()
-    logger.add(lambda msg: print(msg, end=""))  # noqa: T201
+    logger.add(sink=lambda msg: print(msg, end=""))  # ruff: ignore[print]
     yield
     logger.remove()
 
@@ -25,7 +25,7 @@ def mock_logger():
 def mock_prowl_api():
     """Set up mock Prowl API call."""
     with respx.mock(assert_all_mocked=True) as respx_mock:
-        respx_mock.post("https://api.prowlapp.com/publicapi/add").mock(
+        respx_mock.post("https://api.prowl.app/1/add").mock(
             return_value=Response(
                 status_code=200,
                 text='<?xml version="1.0" encoding="UTF-8"?><prowl><success code="200" remaining="999" '
@@ -57,7 +57,7 @@ def test_help_output():
     assert "--application" in result.output
 
 
-def test_version_check(mock_pypi_api):  # noqa: ANN001
+def test_version_check(mock_pypi_api):  # ruff: ignore[missing-type-function-argument]
     """Test call to --version."""
     result = CliRunner().invoke(cli=main, args=["--version"])
     assert result.exit_code == 0
@@ -77,7 +77,7 @@ def test_no_arguments():
         sys.argv = original_argv
 
 
-def test_successful_message_send(mock_prowl_api):  # noqa: ANN001
+def test_successful_message_send(mock_prowl_api):  # ruff: ignore[missing-type-function-argument]
     """Test for successful message."""
     result = CliRunner().invoke(
         cli=main,
@@ -105,7 +105,7 @@ def test_missing_required_params():
     assert "Must provide application" in result.output
 
 
-def test_invalid_priority(mock_prowl_api):  # noqa: ANN001
+def test_invalid_priority(mock_prowl_api):  # ruff: ignore[missing-type-function-argument]
     """Test with invalid/clamped priority."""
     result = CliRunner().invoke(
         cli=main,
@@ -134,7 +134,7 @@ def test_pypi_timeout():
         assert "Timeout reached fetching current version" in result.output
 
 
-def test_multiple_apikeys(mock_prowl_api):  # noqa: ANN001
+def test_multiple_apikeys(mock_prowl_api):  # ruff: ignore[missing-type-function-argument]
     """Test with multiple API keys set."""
     result = CliRunner().invoke(
         cli=main,
@@ -154,7 +154,7 @@ def test_multiple_apikeys(mock_prowl_api):  # noqa: ANN001
     assert mock_prowl_api.calls.last.request.url.params["apikey"] == "key1,key2"
 
 
-def test_missing_cli_components(monkeypatch, capsys):  # noqa: ANN001
+def test_missing_cli_components(monkeypatch, capsys):  # ruff: ignore[missing-type-function-argument]
     """Test with missing CLI components."""
     monkeypatch.setitem(sys.modules, "click", None)
     monkeypatch.setitem(sys.modules, "loguru", None)

@@ -11,12 +11,13 @@ Typical usage:
 
 import types
 from collections.abc import Callable, Coroutine
+from importlib import metadata
 from typing import Any, NoReturn
 
 import httpx
 import xmltodict
 
-__version__: str = "1.1.5"
+__version__: str = metadata.version(distribution_name="prowlpy")
 
 
 class APIError(Exception):
@@ -69,13 +70,13 @@ class ProwlpyCore:
                 "Content-Type": "application/x-www-form-urlencoded",
             },
         )
-        self.baseurl = "https://api.prowlapp.com/publicapi"
+        self.baseurl = "https://api.prowl.app/1"
 
     def _api_error_handler(self, error_code: int, reason: str = "") -> NoReturn:
         """
         Raise an exception based on the error code from Prowl API.
 
-        Errors from http://www.prowlapp.com/api.php
+        Errors from https://www.prowl.app/api?v=1
 
         Raises:
             BadRequestError: The parameters you provided did not validate.
@@ -246,7 +247,7 @@ class Prowl(ProwlpyCore):
         self,
         apikey: str | list[str] | None = None,
         providerkey: str | None = None,
-        client: Any = None,  # noqa: ANN401
+        client: Any = None,  # ruff: ignore[any-type]
     ) -> None:
         """
         Initialize a Prowl object with an API key and optionally a Provider key.
@@ -303,9 +304,13 @@ class Prowl(ProwlpyCore):
         """
         if method.lower() not in {"post", "get"}:
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
-        request_client = getattr(self.client, method.lower())
         try:
-            response: httpx.Response = request_client(url=url, params=data, headers=self.headers)
+            response: httpx.Response = self.client.request(
+                method=method.upper(),
+                url=url,
+                params=data,
+                headers=self.headers,
+            )
             if not response.is_success:
                 self._api_error_handler(response.status_code, response.text)
         except httpx.RequestError as error:
@@ -388,7 +393,7 @@ class Prowl(ProwlpyCore):
 
         Returns:
             dict: {'token': '38528720c5f2f071300f2cc7e6b5a3fb3144761d',
-                   'url': 'https://www.prowlapp.com/retrieve.php?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
+                   'url': 'https://www.prowl.app/retrieve?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
                    'code': '200',
                    'remaining': '999',
                    'resetdate': '1735714800'}
@@ -452,7 +457,7 @@ class AsyncProwl(ProwlpyCore):
         self,
         apikey: str | list[str] | None = None,
         providerkey: str | None = None,
-        client: Any = None,  # noqa: ANN401
+        client: Any = None,  # ruff: ignore[any-type]
     ) -> None:
         """
         Initialize an AsyncProwl object with an API key and optionally a Provider key.
@@ -509,9 +514,13 @@ class AsyncProwl(ProwlpyCore):
         """
         if method.lower() not in {"post", "get"}:
             raise ValueError("Invalid method type. Must be 'post' or 'get'.")
-        request_client = getattr(self.client, method.lower())
         try:
-            response: httpx.Response = await request_client(url=url, params=data, headers=self.headers)
+            response: httpx.Response = await self.client.request(
+                method=method.upper(),
+                url=url,
+                params=data,
+                headers=self.headers,
+            )
             if not response.is_success:
                 self._api_error_handler(error_code=response.status_code, reason=response.text)
         except httpx.RequestError as error:
@@ -593,7 +602,7 @@ class AsyncProwl(ProwlpyCore):
 
         Returns:
             dict: {'token': '38528720c5f2f071300f2cc7e6b5a3fb3144761d',
-                   'url': 'https://www.prowlapp.com/retrieve.php?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
+                   'url': 'https://www.prowl.app/retrieve?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
                    'code': '200',
                    'remaining': '999',
                    'resetdate': '1735714800'}

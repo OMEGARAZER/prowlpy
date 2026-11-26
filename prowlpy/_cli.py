@@ -7,9 +7,9 @@ try:
     from httpx import Client
     from loguru import logger
 except ImportError:
-    print(  # noqa: T201
+    print(  # ruff: ignore[print]
         "The Prowlpy command line client could not be run because the required dependencies were not installed.\n"
-        "Make sure it is installed with pip install prowlpy[cli]",
+        "Make sure it is installed with pip install prowlpy[cli] if you used pip to install.",
     )
     sys.exit(1)
 

@@ -16,5 +16,5 @@ def prowl():
 @pytest.fixture
 def mock_api():
     """Set up mock API responses."""
-    with respx.mock(base_url="https://api.prowlapp.com/publicapi", assert_all_mocked=True) as respx_mock:
+    with respx.mock(base_url="https://api.prowl.app/1", assert_all_mocked=True) as respx_mock:
         yield respx_mock

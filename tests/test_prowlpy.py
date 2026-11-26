@@ -59,7 +59,7 @@ def test_context_manager() -> None:
 
 def test_context_manager_with_error() -> None:
     """Test context manager handles exceptions properly."""
-    with pytest.raises(expected_exception=ValueError, match="Test error"), Prowl(apikey=VALID_API_KEY) as prowl:  # noqa: PT012
+    with pytest.raises(expected_exception=ValueError, match="Test error"), Prowl(apikey=VALID_API_KEY) as prowl:  # ruff: ignore[pytest-raises-with-multiple-statements]
         assert isinstance(prowl, Prowl)
         raise ValueError("Test error")
 
@@ -361,7 +361,7 @@ def test_make_request_invalid_method() -> None:
     """Test if invalid method passed to _make_request."""
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=ValueError, match="Invalid method type"):
-        prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # noqa: SLF001
+        prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # ruff: ignore[private-member-access]
 
 
 def test_client_passthrough(mock_api: respx.Router) -> None:
