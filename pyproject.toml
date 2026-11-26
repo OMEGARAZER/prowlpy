@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=65.6.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
 
 [project]
 name = "prowlpy"
@@ -18,17 +18,17 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 requires-python = ">=3.11"
 dependencies = [
     "pyreqwest>=0.12.0",
     "xmltodict>=0.13.0",  # Ubuntu 24.04 packaged version
 ]
-dynamic = ["version"]
+version = "2.0.2"
 
-[tool.setuptools]
-dynamic = {"version" = {attr = "prowlpy.prowlpy.__version__"}}
-packages = ["prowlpy",]
+[tool.uv.build-backend]
+module-root = ""
 
 [project.optional-dependencies]
 cli = [
@@ -46,10 +46,10 @@ prowlpy = "prowlpy._cli:app"
 
 [dependency-groups]
 dev = [
-    "loguru>=0.7.3",
-    "prek>=0.4.1",
-    "pyreqwest>=0.12.0",
-    "typer>=0.25.1",
+    "loguru>=0.8.0",
+    "prek>=0.5.11",
+    "pyreqwest>=0.15.1",
+    "typer>=0.29.2",
     "xmltodict>=1.0.4",
     {include-group = "lint"},
     {include-group = "type"},
@@ -57,19 +57,19 @@ dev = [
 ]
 lint = [
     "refurb>=2.3.1",
-    "ruff>=0.15.14",
+    "ruff>=0.17.5"
 ]
 type = [
-    "mypy>=2.1.0",
-    "pyrefly>=1.0.0",
-    "pyright>=1.1.409",
-    "types-xmltodict>=1.0.1.20260408",
-    "ty>=0.0.38",
+    "mypy>=2.4.1",
+    "pyrefly>=1.4.1",
+    "pyright>=1.1.414",
+    "types-xmltodict>=1.0.1.20260518",
+    "ty>=0.0.107"
 ]
 test = [
-    "pytest>=9.0.3",
-    "pytest-asyncio>=1.3.0",
-    "pytest-cov>=7.1.0",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0"
 ]
 
 [tool.mypy]
@@ -104,7 +104,7 @@ extend-exclude = []
 line-length = 120
 lint.flake8-annotations = {"suppress-dummy-args" = true}
 lint.ignore = ["CPY", "D212", "EM", "FBT001", "TRY0"]
-lint.per-file-ignores = {"tests/*" = ["ARG001", "DOC201", "DOC402", "DOC501", "INP001", "S101", "S105"], "Examples/*" = ["INP", "T201"]}
+lint.per-file-ignores = {"pyproject.toml" = ["RUF201"], "tests/*" = ["ARG001", "DOC201", "DOC402", "DOC501", "INP001", "S101", "S105"], "Examples/*" = ["INP", "T201"]}
 lint.pydocstyle = {"convention" = "google"}
 lint.pylint = {"allow-magic-value-types" = ["bytes", "int", "str"], "max-args" = 8, "max-positional-args" = 8}
 lint.select = ["ALL"]
@@ -116,3 +116,7 @@ target-version = "py311"
 [tool.ty]
 rules.no-matching-overload = "ignore"
 terminal.output-format = "full"
+
+[tool.uv]
+exclude-newer = "1 week"
+exclude-newer-package = {} # Do not add to unless required, with reason commented

@@ -9,7 +9,7 @@ try:
     from pyreqwest.client import SyncClientBuilder
     from pyreqwest.exceptions import JSONDecodeError, RequestTimeoutError, StatusError
 except ImportError:
-    print(  # noqa: T201
+    print(  # ruff: ignore[print]
         "The Prowlpy command line client could not be run because the required dependencies were not installed.\n"
         "Make sure it is installed with pip install prowlpy[cli] if you used pip to install.",
     )

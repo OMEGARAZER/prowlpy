@@ -10,15 +10,15 @@ from pyreqwest.pytest_plugin import ClientMocker, Mock
 from pyreqwest.request import Request
 from typer.testing import CliRunner
 
-from prowlpy._cli import app  # noqa: PLC2701
+from prowlpy._cli import app  # ruff: ignore[import-private-name]
 from prowlpy.prowlpy import __version__
 
 
-@pytest.fixture(autouse=True)
-def mock_logger():  # noqa: ANN201
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse]
+def mock_logger():  # ruff: ignore[missing-return-type-public-function]
     """Mock Loguru logger."""
     logger.remove()
-    logger.add(sink=lambda msg: print(msg, end=""))  # noqa: T201
+    logger.add(sink=lambda msg: print(msg, end=""))  # ruff: ignore[print]
     yield
     logger.remove()
 
@@ -29,7 +29,7 @@ def mock_prowl_api(client_mocker: ClientMocker) -> Mock:
     return (
         client_mocker
         .strict(enabled=True)
-        .post(path="/publicapi/add")
+        .post(path="/1/add")
         .with_status(status=200)
         .with_body_text(
             body='<?xml version="1.0" encoding="UTF-8"?><prowl><success code="200" remaining="999" '
@@ -65,7 +65,7 @@ def test_version_check(mock_pypi_api: ClientMocker) -> None:
     assert result.exit_code == 0
     assert "You are currently using v" in result.output
     assert f"v{__version__}" in result.output
-    mock_pypi_api.assert_called(count=1)  # pyright: ignore[reportAttributeAccessIssue] # ty:ignore[unresolved-attribute]
+    mock_pypi_api.assert_called(count=1)  # ty:ignore[missing-attribute]
 
 
 def test_no_arguments() -> None:
@@ -179,7 +179,7 @@ def test_multiple_apikeys(mock_prowl_api: ClientMocker) -> None:
     assert last_request["apikey"] == "key1,key2"
 
 
-def test_missing_cli_components(monkeypatch, capsys) -> None:  # noqa: ANN001
+def test_missing_cli_components(monkeypatch, capsys) -> None:  # ruff: ignore[missing-type-function-argument]
     """Test with missing CLI components."""
     monkeypatch.setitem(sys.modules, "click", None)
     monkeypatch.setitem(sys.modules, "loguru", None)

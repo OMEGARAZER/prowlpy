@@ -11,6 +11,7 @@ Typical usage:
 
 import types
 from collections.abc import Callable, Coroutine
+from importlib import metadata
 from typing import Any, NoReturn, Self
 
 import xmltodict
@@ -18,7 +19,7 @@ from pyreqwest.client import Client, ClientBuilder, SyncClient, SyncClientBuilde
 from pyreqwest.exceptions import RequestError
 from pyreqwest.response import Response, SyncResponse
 
-__version__: str = "2.0.1"
+__version__: str = metadata.version(distribution_name="prowlpy")
 
 
 class APIError(Exception):
@@ -69,13 +70,13 @@ class ProwlpyCore:
             "User-Agent": f"Prowlpy/{__version__}",
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        self.baseurl = "https://api.prowlapp.com/publicapi"
+        self.baseurl = "https://api.prowl.app/1"
 
     def _api_error_handler(self, error_code: int, reason: str = "") -> NoReturn:
         """
         Raise an exception based on the error code from Prowl API.
 
-        Errors from http://www.prowlapp.com/api.php
+        Errors from https://www.prowl.app/api?v=1
 
         Raises:
             BadRequestError: The parameters you provided did not validate.
@@ -246,7 +247,7 @@ class Prowl(ProwlpyCore):
         self,
         apikey: str | list[str] | None = None,
         providerkey: str | None = None,
-        client: Any = None,  # noqa: ANN401
+        client: Any = None,  # ruff: ignore[any-type]
     ) -> None:
         """
         Initialize a Prowl object with an API key and optionally a Provider key.
@@ -394,7 +395,7 @@ class Prowl(ProwlpyCore):
 
         Returns:
             dict: {'token': '38528720c5f2f071300f2cc7e6b5a3fb3144761d',
-                   'url': 'https://www.prowlapp.com/retrieve.php?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
+                   'url': 'https://www.prowl.app/retrieve?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
                    'code': '200',
                    'remaining': '999',
                    'resetdate': '1735714800'}
@@ -458,7 +459,7 @@ class AsyncProwl(ProwlpyCore):
         self,
         apikey: str | list[str] | None = None,
         providerkey: str | None = None,
-        client: Any = None,  # noqa: ANN401
+        client: Any = None,  # ruff: ignore[any-type]
     ) -> None:
         """
         Initialize an AsyncProwl object with an API key and optionally a Provider key.
@@ -605,7 +606,7 @@ class AsyncProwl(ProwlpyCore):
 
         Returns:
             dict: {'token': '38528720c5f2f071300f2cc7e6b5a3fb3144761d',
-                   'url': 'https://www.prowlapp.com/retrieve.php?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
+                   'url': 'https://www.prowl.app/retrieve?token=38528720c5f2f071300f2cc7e6b5a3fb3144761d',
                    'code': '200',
                    'remaining': '999',
                    'resetdate': '1735714800'}

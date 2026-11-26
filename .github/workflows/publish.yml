@@ -12,9 +12,9 @@ jobs:
             contents: write
             id-token: write
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - name: Install uv
-              uses: astral-sh/setup-uv@v8.1.0
+              uses: astral-sh/setup-uv@v10.4.0
               with:
                   version: "latest"
 
@@ -26,8 +26,13 @@ jobs:
               with:
                   subject-path: dist/*
 
+            - name: Generate uv attestations
+              uses: astral-sh/attest-action@v0.0.7
+              with:
+                  paths: dist/*
+
             - name: Publish to Pypi
-              run: uv publish --attestation
+              run: uv publish
 
             - name: Add build to release
               env:

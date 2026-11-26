@@ -14,7 +14,7 @@ SUCCESS_RESPONSE: str = """<?xml version="1.0" encoding="UTF-8"?>
 TOKEN_RESPONSE: str = """<?xml version="1.0" encoding="UTF-8"?>
 <prowl>
     <success code="200" remaining="994" resetdate="1234567890"/>
-    <retrieve token="1234567890123456789012345678901234567890"  url="https://www.prowlapp.com/retrieve.php?token=1234567890123456789012345678901234567890"/>
+    <retrieve token="1234567890123456789012345678901234567890"  url="https://www.prowl.app/retrieve?token=1234567890123456789012345678901234567890"/>
 </prowl>"""
 
 APIKEY_RESPONSE: str = """<?xml version="1.0" encoding="UTF-8"?>

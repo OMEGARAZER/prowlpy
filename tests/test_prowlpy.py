@@ -61,7 +61,7 @@ def test_context_manager() -> None:
 
 def test_context_manager_with_error() -> None:
     """Test context manager handles exceptions properly."""
-    with pytest.raises(expected_exception=ValueError, match="Test error"), Prowl(apikey=VALID_API_KEY) as prowl:  # noqa: PT012
+    with pytest.raises(expected_exception=ValueError, match="Test error"), Prowl(apikey=VALID_API_KEY) as prowl:  # ruff: ignore[pytest-raises-with-multiple-statements]
         assert isinstance(prowl, Prowl)
         raise ValueError("Test error")
 
@@ -74,7 +74,7 @@ def test_context_manager_bad_client_close() -> None:
 
 def test_post_notification_success(mock_api: ClientMocker) -> None:
     """Test successful notification post."""
-    mock_api.post(path="/publicapi/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.post(path="/1/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     prowl.post(application="Test App", event="Test Event", description="Test Description")
@@ -82,7 +82,7 @@ def test_post_notification_success(mock_api: ClientMocker) -> None:
 
 def test_send_notification_success(mock_api: ClientMocker) -> None:
     """Test successful notification send."""
-    mock_api.post(path="/publicapi/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.post(path="/1/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     prowl.send(application="Test App", event="Test Event", description="Test Description")
@@ -90,7 +90,7 @@ def test_send_notification_success(mock_api: ClientMocker) -> None:
 
 def test_add_notification_success(mock_api: ClientMocker) -> None:
     """Test successful notification add."""
-    mock_api.post(path="/publicapi/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.post(path="/1/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     prowl.add(application="Test App", event="Test Event", description="Test Description")
@@ -105,7 +105,7 @@ def test_post_notification_without_apikey() -> None:
 
 def test_post_notification_with_all_params(mock_api: ClientMocker) -> None:
     """Test notification post with all parameters."""
-    mock_api.post(path="/publicapi/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.post(path="/1/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     prowl.post(
@@ -120,7 +120,7 @@ def test_post_notification_with_all_params(mock_api: ClientMocker) -> None:
 
 def test_post_notification_with_both_keys_init(mock_api: ClientMocker) -> None:
     """Test notification post with all parameters."""
-    mock_api.post(path="/publicapi/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.post(path="/1/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY, providerkey=VALID_PROVIDER_KEY)
     prowl.post(application="Test App", event="Test Event", description="Test Description")
@@ -142,7 +142,7 @@ def test_post_notification_missing_required() -> None:
 
 def test_post_notification_api_error(mock_api: ClientMocker) -> None:
     """Test notification post with API error."""
-    mock_api.post(path="/publicapi/add").with_status(status=400).with_body_text(body="Bad Request")
+    mock_api.post(path="/1/add").with_status(status=400).with_body_text(body="Bad Request")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Bad Request"):
@@ -155,7 +155,7 @@ def test_post_notification_api_error(mock_api: ClientMocker) -> None:
 
 def test_verify_key_success(mock_api: ClientMocker) -> None:
     """Test successful key verification."""
-    mock_api.get(path="/publicapi/verify").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.get(path="/1/verify").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     prowl.verify_key(providerkey=VALID_PROVIDER_KEY)
@@ -163,7 +163,7 @@ def test_verify_key_success(mock_api: ClientMocker) -> None:
 
 def test_verify_key_success_with_providerkey_init(mock_api: ClientMocker) -> None:
     """Test successful key verification."""
-    mock_api.get(path="/publicapi/verify").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.get(path="/1/verify").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY, providerkey=VALID_PROVIDER_KEY)
     prowl.verify_key()
@@ -171,7 +171,7 @@ def test_verify_key_success_with_providerkey_init(mock_api: ClientMocker) -> Non
 
 def test_verify_key_invalid(mock_api: ClientMocker) -> None:
     """Test invalid key verification."""
-    mock_api.get(path="/publicapi/verify").with_status(status=401).with_body_text(body="Invalid API key")
+    mock_api.get(path="/1/verify").with_status(status=401).with_body_text(body="Invalid API key")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match=f"Invalid API key: {VALID_API_KEY}"):
@@ -187,7 +187,7 @@ def test_verify_key_without_key() -> None:
 
 def test_retrieve_token_success(mock_api: ClientMocker) -> None:
     """Test successful token retrieval."""
-    mock_api.get(path="/publicapi/retrieve/token").with_status(status=200).with_body_text(body=TOKEN_RESPONSE)
+    mock_api.get(path="/1/retrieve/token").with_status(status=200).with_body_text(body=TOKEN_RESPONSE)
 
     result = Prowl(apikey=VALID_API_KEY).retrieve_token(providerkey=VALID_PROVIDER_KEY)
     assert "token" in result
@@ -196,7 +196,7 @@ def test_retrieve_token_success(mock_api: ClientMocker) -> None:
 
 def test_retrieve_token_success_providerkey_init(mock_api: ClientMocker) -> None:
     """Test successful token retrieval."""
-    mock_api.get(path="/publicapi/retrieve/token").with_status(status=200).with_body_text(body=TOKEN_RESPONSE)
+    mock_api.get(path="/1/retrieve/token").with_status(status=200).with_body_text(body=TOKEN_RESPONSE)
 
     result = Prowl(apikey=VALID_API_KEY, providerkey=VALID_PROVIDER_KEY).retrieve_token()
     assert "token" in result
@@ -205,7 +205,7 @@ def test_retrieve_token_success_providerkey_init(mock_api: ClientMocker) -> None
 
 def test_retrieve_apikey_success(mock_api: ClientMocker) -> None:
     """Test successful API key retrieval."""
-    mock_api.get(path="/publicapi/retrieve/apikey").with_status(status=200).with_body_text(body=APIKEY_RESPONSE)
+    mock_api.get(path="/1/retrieve/apikey").with_status(status=200).with_body_text(body=APIKEY_RESPONSE)
 
     result = Prowl(apikey=VALID_API_KEY).retrieve_apikey(providerkey=VALID_PROVIDER_KEY, token=VALID_TOKEN)
     assert "apikey" in result
@@ -214,7 +214,7 @@ def test_retrieve_apikey_success(mock_api: ClientMocker) -> None:
 
 def test_retrieve_apikey_success_providerkey_init(mock_api: ClientMocker) -> None:
     """Test successful API key retrieval."""
-    mock_api.get(path="/publicapi/retrieve/apikey").with_status(status=200).with_body_text(body=APIKEY_RESPONSE)
+    mock_api.get(path="/1/retrieve/apikey").with_status(status=200).with_body_text(body=APIKEY_RESPONSE)
 
     result = Prowl(apikey=VALID_API_KEY, providerkey=VALID_PROVIDER_KEY).retrieve_apikey(token=VALID_TOKEN)
     assert "apikey" in result
@@ -230,7 +230,7 @@ def test_retrieve_token_missing_provider_key() -> None:
 
 def test_retrieve_token_error(mock_api: ClientMocker) -> None:
     """Test error in token retrieval."""
-    mock_api.get(path="/publicapi/retrieve/token").with_status(status=400).with_body_text(body="Bad Request")
+    mock_api.get(path="/1/retrieve/token").with_status(status=400).with_body_text(body="Bad Request")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Bad Request"):
@@ -239,7 +239,7 @@ def test_retrieve_token_error(mock_api: ClientMocker) -> None:
 
 def test_retrieve_apikey_error(mock_api: ClientMocker) -> None:
     """Test error in API key retrieval."""
-    mock_api.get(path="/publicapi/retrieve/apikey").with_status(status=400).with_body_text(body="Bad Request")
+    mock_api.get(path="/1/retrieve/apikey").with_status(status=400).with_body_text(body="Bad Request")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Bad Request"):
@@ -262,7 +262,7 @@ def test_retrieve_apikey_missing_token() -> None:
 
 def test_retrieve_token_invalid_xml(mock_api: ClientMocker) -> None:
     """Test retrieve_token with invalid XML response."""
-    mock_api.get(path="/publicapi/retrieve/token").with_status(status=200).with_body_text(body=INVALID_XML_RESPONSE)
+    mock_api.get(path="/1/retrieve/token").with_status(status=200).with_body_text(body=INVALID_XML_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=KeyError):
@@ -271,7 +271,7 @@ def test_retrieve_token_invalid_xml(mock_api: ClientMocker) -> None:
 
 def test_retrieve_apikey_invalid_xml(mock_api: ClientMocker) -> None:
     """Test retrieve_apikey with invalid XML response."""
-    mock_api.get(path="/publicapi/retrieve/apikey").with_status(status=200).with_body_text(body=INVALID_XML_RESPONSE)
+    mock_api.get(path="/1/retrieve/apikey").with_status(status=200).with_body_text(body=INVALID_XML_RESPONSE)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=KeyError):
@@ -280,7 +280,7 @@ def test_retrieve_apikey_invalid_xml(mock_api: ClientMocker) -> None:
 
 def test_post_unknown_error(mock_api: ClientMocker) -> None:
     """Test post with unknown error code."""
-    mock_api.post(path="/publicapi/add").with_status(status=418).with_body_text(body="I'm a teapot")
+    mock_api.post(path="/1/add").with_status(status=418).with_body_text(body="I'm a teapot")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Unknown API error: Error code 418"):
@@ -293,7 +293,7 @@ def test_post_unknown_error(mock_api: ClientMocker) -> None:
 
 def test_post_rate_limit_error(mock_api: ClientMocker) -> None:
     """Test post with rate limit error."""
-    mock_api.post(path="/publicapi/add").with_status(status=406).with_body_text(body="Rate limit exceeded")
+    mock_api.post(path="/1/add").with_status(status=406).with_body_text(body="Rate limit exceeded")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Not accepted: Your IP address has exceeded the API limit"):
@@ -306,7 +306,7 @@ def test_post_rate_limit_error(mock_api: ClientMocker) -> None:
 
 def test_post_not_approved_error(mock_api: ClientMocker) -> None:
     """Test post with not approved error."""
-    mock_api.post(path="/publicapi/add").with_status(status=409).with_body_text(body="Not approved")
+    mock_api.post(path="/1/add").with_status(status=409).with_body_text(body="Not approved")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(
@@ -322,7 +322,7 @@ def test_post_not_approved_error(mock_api: ClientMocker) -> None:
 
 def test_post_server_error(mock_api: ClientMocker) -> None:
     """Test post with server error."""
-    mock_api.post(path="/publicapi/add").with_status(status=500).with_body_text(body="Internal Server Error")
+    mock_api.post(path="/1/add").with_status(status=500).with_body_text(body="Internal Server Error")
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Internal server error - Internal Server Error"):
@@ -335,7 +335,7 @@ def test_post_server_error(mock_api: ClientMocker) -> None:
 
 def test_post_server_error_no_reason(mock_api: ClientMocker) -> None:
     """Test post with server error."""
-    mock_api.post(path="/publicapi/add").with_status(status=500)
+    mock_api.post(path="/1/add").with_status(status=500)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match="Internal server error"):
@@ -352,7 +352,7 @@ def test_post_network_error(mock_api: ClientMocker) -> None:
     def raise_transport_error(_request: Request) -> None:
         raise TransportError("Connection error", {"causes": None})
 
-    mock_api.post(path="/publicapi/add").match_request_with_response(handler=raise_transport_error)
+    mock_api.post(path="/1/add").match_request_with_response(handler=raise_transport_error)
 
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=APIError, match=r"API connection error:.*Connection error"):
@@ -367,12 +367,12 @@ def test_make_request_invalid_method() -> None:
     """Test if invalid method passed to _make_request."""
     prowl = Prowl(apikey=VALID_API_KEY)
     with pytest.raises(expected_exception=ValueError, match="Invalid method type"):
-        prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # noqa: SLF001
+        prowl._make_request(method="invalid", url="/post", data={"providerkey": VALID_PROVIDER_KEY})  # ruff: ignore[private-member-access]
 
 
 def test_client_passthrough(mock_api: ClientMocker) -> None:
     """Test with client passed through to library."""
-    mock_api.post(path="/publicapi/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
+    mock_api.post(path="/1/add").with_status(status=200).with_body_text(body=SUCCESS_RESPONSE)
 
     client: SyncClient = SyncClientBuilder().build()
     prowl = Prowl(apikey=VALID_API_KEY, client=client)
